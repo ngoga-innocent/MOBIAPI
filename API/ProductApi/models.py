@@ -23,10 +23,13 @@ class Product(models.Model):
     rating=models.IntegerField()
     brand=models.CharField(max_length=255)
     category=models.ForeignKey(Categories,on_delete=models.CASCADE,related_name='category_name')
-    thumbnail=models.ImageField(blank=True)
-    images=models.ImageField(blank=True,null=True)
+    thumbnail=models.ImageField(blank=True,upload_to='Thumbnail')
+    images=models.ImageField(blank=True,null=True,upload_to='Images')
     seller=models.ForeignKey(User,on_delete=models.CASCADE,related_name='seller_name',null=True,blank=True)
     shop=models.ForeignKey(Shop,on_delete=models.CASCADE,null=True,blank=True,related_name='shop_name')
 
     def __str__(self):
         return self.title
+class ProductImages(models.Model):
+    product=models.ForeignKey(Product,related_name='proimages',on_delete=models.CASCADE)
+    Productimage=models.ImageField(upload_to='Images',blank=True)
