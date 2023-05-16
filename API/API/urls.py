@@ -24,10 +24,14 @@ router=DefaultRouter()
 router.register('Product',views.ProductApi)
 router.register('Categories',views.CategoriesApi)
 router.register('Shop',views.ShopApi)
+router.register('Color',views.ColorApi)
+router.register('test',views.TestImage)
+# router.register('Product/category/<id:int>',views.ProductCategoryApi)
 
 urlpatterns = [
-     path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('',include(router.urls)),
+    path('Product/category/<int:id>',views.ProductCategoryApi.as_view())
     
     
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

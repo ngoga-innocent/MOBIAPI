@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .models import Product,Categories,Shop
-from .serializer import ProductSerializer,CategoriesSerializer,ShopSerializer
+from .models import Product,Categories,Shop,Color,Test
+from .serializer import ProductSerializer,CategoriesSerializer,ShopSerializer,ColorSerializer,TestSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import viewsets
@@ -14,7 +14,10 @@ class ProductApi(viewsets.ModelViewSet):
     serializer_class=ProductSerializer
     filter_backends=[filters.SearchFilter]
     search_fields=['title','shop__name','seller__username','category__name']
-
+class ColorApi(viewsets.ModelViewSet):
+    queryset=Color.objects.all()
+    serializer_class=ColorSerializer
+    filter_backends=[filters.SearchFilter]
 class CategoriesApi(viewsets.ModelViewSet):
     queryset=Categories.objects.all()
     serializer_class=CategoriesSerializer
@@ -25,6 +28,16 @@ class ShopApi(viewsets.ModelViewSet):
     serializer_class=ShopSerializer
     filter_backends=[filters.SearchFilter]
     search_fields=['name']
+
+class ProductCategoryApi(APIView):
+   
+      def get(self,request,id):
+        products=Product.objects.filter(category=id)
+        serializer=ProductSerializer(products,many=True,context={'request':request})
+        return Response(serializer.data)
+class TestImage(viewsets.ModelViewSet):
+    queryset=Test.objects.all()
+    serializer_class=TestSerializer
 # # Create your views here.
 # # def Product_list(request):
 # #     products=Product.objects.all()
