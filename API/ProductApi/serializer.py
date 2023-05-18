@@ -1,11 +1,28 @@
-from rest_framework import serializers 
+from rest_framework import serializers,validators
 from .models import Product,Shop,Categories,ProductImages,Color,Test
 import base64
+from django.contrib.auth.models import User
+# from django.contrib.auth import get_user_model
+
+# User=get_user_model()
 
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model=Shop
         fields='__all__'
+
+
+        extra_kwargs={
+              "name":{
+                "allow_blank":False,
+                "required":True,
+                "validators":[
+                    validators.UniqueValidator(
+            Shop.objects.all(),"This name Already registered"
+                    )
+                ]
+            }
+        }
   
 class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,3 +71,43 @@ class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model=Test
         fields='__all__'
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+ 
+    class Meta:
+        model=User
+        fields=['username','email','password','first_name','last_name']
+
+        extra_kwargs={
+            "pasword":{"write_only":True},
+            "email":{
+                "allow_blank":False,
+                "required":True,
+                "validators":[
+                    validators.UniqueValidator(
+            User.objects.all(),"A user with that Email already registered"
+                    )
+                ]
+            }
+
+        }
+    
+    def create(self,validated_data):
+        username=validated_data.get('username')
+        email=validated_data.get('email')
+        first_name=validated_data.get('first_name')
+        last_name=validated_data.get('last_name')
+        password=validated_data.get('password')
+      
+
+        user=User(username=username,email=email,first_name=first_name,last_name=last_name)
+       
+        user.set_password(password)
+        user.save()
+        return user
+        # else:
+        #     raise serializers.ValidationError({
+        #         'error':'passwords do  not match'
+        #     })
+       
+           

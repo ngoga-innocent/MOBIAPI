@@ -1,11 +1,14 @@
-from django.shortcuts import render
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product,Categories,Shop,Color,Test
-from .serializer import ProductSerializer,CategoriesSerializer,ShopSerializer,ColorSerializer,TestSerializer
+from django.contrib.auth.models import User
+from .serializer import ProductSerializer,CategoriesSerializer,ShopSerializer,ColorSerializer,TestSerializer,UserRegistrationSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework import filters
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from knox.auth import AuthToken
 
 
 
@@ -38,6 +41,54 @@ class ProductCategoryApi(APIView):
 class TestImage(viewsets.ModelViewSet):
     queryset=Test.objects.all()
     serializer_class=TestSerializer
+
+class UserRegister(APIView):
+    def post(self,request):
+        serializer=UserRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user=serializer.save()
+
+        _,token=AuthToken.objects.create(user)
+
+        return Response({
+        'user_info':{
+                    'id':user.id,
+                    'username':user.username,
+                    'email':user.email
+                },
+                'token':token
+        })
+class Login(APIView):
+    def post(self,request):
+        serializer=AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user=serializer.validated_data.get('user')
+        _,token=AuthToken.objects.create(user)
+
+        return Response({
+            'user_info':{
+                'id':user.id,
+                'username':user.username,
+                'email':user.email
+            },
+            'token':token
+        })
+class User(APIView):
+    def get(self,request):
+        user=request.user
+
+        if user.is_authenticated:
+            return Response({
+                'user_info':{
+                    'id':user.id,
+                    'username':user.username,
+                    'email':user.email
+                }
+            })
+        else:
+            return Response({'error':'you are not logged in'},status=400)
+        
 # # Create your views here.
 # # def Product_list(request):
 # #     products=Product.objects.all()

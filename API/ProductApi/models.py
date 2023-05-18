@@ -15,6 +15,7 @@ class Shop(models.Model):
     profile=models.ImageField(blank=True)
     telephone=models.IntegerField()
     location=models.CharField(max_length=255)
+    # owner=models.ForeignKey(User,on_delete=models.CASCADE,default='admin')
 
     def __str__(self):
         return self.name
@@ -37,7 +38,7 @@ class Product(models.Model):
     images=models.ImageField(blank=True,null=True,upload_to='Images')
     seller=models.ForeignKey(User,on_delete=models.CASCADE,related_name='seller_name',null=True,blank=True)
     shop=models.ForeignKey(Shop,on_delete=models.CASCADE,null=True,blank=True,related_name='shop_name')
-    colors=models.ManyToManyField(Color,null=True,related_name='color')
+    colors=models.ManyToManyField(Color,related_name='color')
     def __str__(self):
         return self.title
 class ProductImages(models.Model):
