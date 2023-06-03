@@ -111,6 +111,12 @@ class UserLike(models.Model):
     liked = models.IntegerField(default=0)
 
 
-class Followers(models.Model):
+class UserFollow(models.Model):
+    shopid = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    userid = models.ForeignKey(User, on_delete=models.CASCADE)
+    followed = models.BooleanField()
+
+
+class shopFollowers(models.Model):
     shopid = models.ForeignKey(Shop, on_delete=models.CASCADE)
     followers = models.IntegerField()
