@@ -53,6 +53,7 @@ class Product(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE,
                              null=True, blank=True, related_name='shop_name')
     colors = models.ManyToManyField(Color, related_name='color')
+    discount = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
@@ -120,3 +121,13 @@ class UserFollow(models.Model):
 class shopFollowers(models.Model):
     shopid = models.ForeignKey(Shop, on_delete=models.CASCADE)
     followers = models.IntegerField()
+
+
+class Notification(models.Model):
+    TYPE_CHOICE = [
+        ('app notification', 'app notification'),
+        ('other notification', 'other notification')
+    ]
+    type = models.CharField(choices=TYPE_CHOICE,
+                            default='app notification', max_length=255)
+    Notification = models.TextField()

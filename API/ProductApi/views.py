@@ -35,6 +35,23 @@ class CategoriesApi(viewsets.ModelViewSet):
     search_fields = ['name']
 
 
+class Discount(APIView):
+    def get(self, request):
+        queryset = Product.objects.filter(discount__gt=0)
+        serializer = ProductSerializer(
+            queryset, many=True, context={'request': request})
+
+        if (queryset.exists()):
+            discounted_product = serializer.data
+
+            return Response(serializer.data)
+
+        else:
+            return Response({
+                'msg': 'No Discounted product'
+            })
+
+
 class ShopApi(viewsets.ModelViewSet):
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer
@@ -249,7 +266,8 @@ class SingleShop(APIView):
                     'shop_name': shop_info.get('name'),
                     'shop_profile': shop_info.get('profile'),
                     'shop_location': shop_info.get('location'),
-                    'shop_tel': shop_info.get('telephone')
+                    'shop_tel': shop_info.get('telephone'),
+                    'shop_cover': shop_info.get('cover')
 
                 }
             }, status=status.HTTP_200_OK)
@@ -283,7 +301,7 @@ class UserFollowerView(APIView):
                 'followers': followers
             })
         else:
-            return Response({'msg': 'not followed'})
+            return Response({'msg': ' user not followed this Shop'})
 
     def put(self, request, uid, sid):
         queryset = UserFollow.objects.filter(userid=uid, shopid=sid)
@@ -360,14 +378,14 @@ class shopFollowView(APIView):
                 shopfollowers, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({'msg': 'updated'})
+                return Response({'msg': 'followers updated'})
             else:
                 return Response(serializer.errors, status=400)
         else:
             serializer = ShopFollowersSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({'msg': 'created'})
+                return Response({'msg': 'followers created'})
             else:
                 return Response(serializer.errors, status=400)
 

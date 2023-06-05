@@ -48,7 +48,9 @@ urlpatterns = [
     path('userlike/<int:uid>/<int:sid>', views.UserLikeView.as_view()),
     path('childCategory/<int:id>', views.ChildCategory.as_view()),
     path('userfollow/<int:uid>/<int:sid>', views.UserFollowerView.as_view()),
-    path('shopfollowers/<int:sid>', views.shopFollowView.as_view())
+    path('shopfollowers/<int:sid>', views.shopFollowView.as_view()),
+    path('discount', views.Discount.as_view())
+
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
