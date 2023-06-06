@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product, Categories, Shop, Color, Test, UserProfile, Comment, Rating, Like, UserFollow, UserLike, shopFollowers
+from .models import Product, Categories, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, shopFollowers
 from django.contrib.auth.models import User
-from .serializer import ProductSerializer, ShopFollowersSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
+from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import viewsets
@@ -190,7 +190,7 @@ class Login(APIView):
         }, status=200)
 
 
-class User(APIView):
+class AuthUser(APIView):
     def get(self, request):
         user = request.user
 
@@ -404,6 +404,80 @@ class ChildCategory(APIView):
             return Response({
                 'msg': 'done'
             }, status=404)
+
+
+class OurAddsView(viewsets.ModelViewSet):
+    queryset = OurAdds.objects.all()
+    serializer_class = OurAddsSerializer
+
+
+class NotificationView(APIView):
+    def post(self, request):
+        users = User.objects.all()
+        notifications = []
+        print(request.data)
+        for user in users:
+            notification = Notification(
+                recipient=user,
+                type=request.data.get('type'),
+                is_read=False,
+                message=request.data.get('message')
+
+            )
+            notification.save()
+            notifications.append(notification)
+        serializer = NotificationSerializer(notification)
+        return Response({'msg': 'notification Sent'})
+
+    def get(self, request):
+        notifications = Notification.objects.all()
+        serializer = NotificationSerializer(
+            notifications, many=True, context={'request', request})
+        return Response(serializer.data)
+
+    def put(self, request, notification_id, uid):
+        try:
+            notification = Notification.objects.get(
+                id=notification_id, recipient=uid)
+        except Notification.DoesNotExist:
+            return Response({'error': 'Notification not found'}, status=404)
+
+        notification.is_read = True
+
+        notification.save()
+
+        serializer = NotificationSerializer(notification)
+        return Response(serializer.data)
+
+
+class AppNotification(APIView):
+    def get(self, request):
+        app_notification = Notification.objects.filter(
+            type='app notification', is_read=False)
+        serializer = NotificationSerializer(app_notification, many=True)
+
+        return Response(serializer.data)
+
+
+class OtherNotification(APIView):
+    def get(self, request):
+        notifications = Notification.objects.filter(
+            type='other notification', is_read=False)
+        serializer = NotificationSerializer(notifications, many=True)
+
+        return Response(serializer.data)
+
+
+class UserShops(APIView):
+    def get(self, request, uid):
+        queryset = Shop.objects.filter(owner=uid)
+        serializer = ShopSerializer(
+            queryset, many=True, )
+
+        if (queryset.exists()):
+            return Response(serializer.data)
+        else:
+            return Response({'msg': 'you haven\'nt created any Shop'})
 
 # # Create your views here.
 # # def Product_list(request):

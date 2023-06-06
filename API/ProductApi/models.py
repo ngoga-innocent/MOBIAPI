@@ -128,6 +128,14 @@ class Notification(models.Model):
         ('app notification', 'app notification'),
         ('other notification', 'other notification')
     ]
+    name = models.CharField(max_length=255, default='Updates')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)
     type = models.CharField(choices=TYPE_CHOICE,
                             default='app notification', max_length=255)
-    Notification = models.TextField()
+    message = models.TextField()
+
+
+class OurAdds(models.Model):
+    title = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='our Adds')
