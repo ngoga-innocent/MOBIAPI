@@ -22,7 +22,7 @@ router.register('profile', views.Profile)
 router.register('comment', views.CommentView)
 router.register('rating', views.RatingView)
 router.register('like', views.LikeView)
-router.register('followers', views.FollowerView)
+# router.register('followers', views.FollowerView)
 
 # router.register('Product/category/<id:int>',views.ProductCategoryApi)
 
@@ -45,7 +45,10 @@ urlpatterns = [
     path('shopcomment/<int:id>', views.ShopComment.as_view()),
     path('shopLike/<int:id>', views.ShopLike.as_view()),
     path('shoprate/<int:id>', views.ShopRating.as_view()),
-    path('userlike/<int:uid>/<int:sid>', views.UserLikeView.as_view())
+    path('userlike/<int:uid>/<int:sid>', views.UserLikeView.as_view()),
+    path('childCategory/<int:id>', views.ChildCategory.as_view()),
+    path('userfollow/<int:uid>/<int:sid>', views.UserFollowerView.as_view()),
+    path('shopfollowers/<int:sid>', views.shopFollowView.as_view())
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

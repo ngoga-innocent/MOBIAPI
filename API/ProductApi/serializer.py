@@ -1,5 +1,5 @@
 from rest_framework import serializers, validators
-from .models import Product, Shop, Categories, ProductImages, Color, Test, ProfileImages, UserProfile, Comment, Like, Rating, Followers, UserLike
+from .models import Product, Shop, Categories, ProductImages, Color, Test, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, shopFollowers, UserLike
 import base64
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -188,7 +188,13 @@ class LikeSerializer(serializers.ModelSerializer):
 
 class FollowersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Followers
+        model = UserFollow
+        fields = '__all__'
+
+
+class ShopFollowersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = shopFollowers
         fields = '__all__'
 
 
