@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product, Categories, Shop, Color, Test, UserProfile, Comment, Rating, Like, Followers, UserLike
+from .models import Product, Categories, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, shopFollowers
 from django.contrib.auth.models import User
-from .serializer import ProductSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
+from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import viewsets
@@ -29,10 +29,27 @@ class ColorApi(viewsets.ModelViewSet):
 
 
 class CategoriesApi(viewsets.ModelViewSet):
-    queryset = Categories.objects.all()
+    queryset = Categories.objects.filter(parent__isnull=True)
     serializer_class = CategoriesSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
+
+
+class Discount(APIView):
+    def get(self, request):
+        queryset = Product.objects.filter(discount__gt=0)
+        serializer = ProductSerializer(
+            queryset, many=True, context={'request': request})
+
+        if (queryset.exists()):
+            discounted_product = serializer.data
+
+            return Response(serializer.data)
+
+        else:
+            return Response({
+                'msg': 'No Discounted product'
+            })
 
 
 class ShopApi(viewsets.ModelViewSet):
@@ -90,16 +107,37 @@ class ShopComment(APIView):
 class ShopLike(APIView):
     def get(self, request, id):
         likes = Like.objects.filter(shopid=id)
-        serializer = LikeSerializer(
-            likes, many=True, context={'request', request})
-        like_info = serializer.data[0]
+        if likes.exists():
+            serializer = LikeSerializer(
+                likes, many=True, context={'request', request})
+            like_info = serializer.data[0]
 
-        return Response({
-            'like_info': {
-                'likes': like_info.get('like'),
-                'dislikes': like_info.get('dislike')
-            }
-        })
+            return Response({
+                'like_info': {
+                    'likes': like_info.get('like'),
+                    'dislikes': like_info.get('dislike')
+                }
+            })
+        else:
+            return Response({'msg': 'Not found'})
+
+    def put(self, request, id):
+        queryset = Like.objects.filter(shopid=id)
+        if queryset.exists():
+            user_like = queryset.first()
+            serializer = LikeSerializer(user_like, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'updated'})
+            else:
+                return Response(serializer.errors, status=400)
+        else:
+            serializer = LikeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'created'})
+            else:
+                return Response(serializer.errors, status=400)
 
 
 class ShopRating(APIView):
@@ -152,7 +190,7 @@ class Login(APIView):
         }, status=200)
 
 
-class User(APIView):
+class AuthUser(APIView):
     def get(self, request):
         user = request.user
 
@@ -228,7 +266,8 @@ class SingleShop(APIView):
                     'shop_name': shop_info.get('name'),
                     'shop_profile': shop_info.get('profile'),
                     'shop_location': shop_info.get('location'),
-                    'shop_tel': shop_info.get('telephone')
+                    'shop_tel': shop_info.get('telephone'),
+                    'shop_cover': shop_info.get('cover')
 
                 }
             }, status=status.HTTP_200_OK)
@@ -250,23 +289,195 @@ class LikeView(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
 
 
-class FollowerView(viewsets.ModelViewSet):
-    queryset = Followers.objects.all()
-    serializer_class = FollowersSerializer
+class UserFollowerView(APIView):
+    def get(self, request, uid, sid):
+        queryset = UserFollow.objects.filter(shopid=sid, userid=uid)
+        serializer = FollowersSerializer(
+            queryset, many=True, context={'request': request})
+
+        if queryset.exists():
+            followers = serializer.data
+            return Response({
+                'followers': followers
+            })
+        else:
+            return Response({'msg': ' user not followed this Shop'})
+
+    def put(self, request, uid, sid):
+        queryset = UserFollow.objects.filter(userid=uid, shopid=sid)
+        if queryset.exists():
+            user_like = queryset.first()
+            serializer = FollowersSerializer(user_like, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'updated'})
+            else:
+                return Response(serializer.errors, status=400)
+        else:
+            serializer = FollowersSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'created'})
+            else:
+                return Response(serializer.errors, status=400)
 
 
 class UserLikeView(APIView):
     def get(self, request, uid, sid):
         queryset = UserLike.objects.filter(userid=uid, shopid=sid)
-        serializer = UserLikeSerializer(queryset)
-        if queryset:
-            return Response({
-                'message': 'not Liked or disliked'
-            })
-        else:
+        serializer = UserLikeSerializer(
+            queryset, many=True, context={'request': request})
+        if queryset.exists():
             return Response({
                 'liked': serializer.data
             })
+
+        else:
+            return Response({
+                'message': 'not Liked or disliked'
+            })
+
+    def put(self, request, uid, sid):
+        queryset = UserLike.objects.filter(userid=uid, shopid=sid)
+        if queryset.exists():
+            user_like = queryset.first()
+            serializer = UserLikeSerializer(user_like, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'updated'})
+            else:
+                return Response(serializer.errors, status=400)
+        else:
+            serializer = UserLikeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'created'})
+            else:
+                return Response(serializer.errors, status=400)
+
+
+class shopFollowView(APIView):
+    def get(self, request, sid):
+        queryset = shopFollowers.objects.filter(shopid=sid)
+        serializer = ShopFollowersSerializer(
+            queryset, many=True, context={'request': request})
+
+        if queryset.exists():
+            followers = serializer.data[0]
+            return Response({
+                'followers': followers['followers']
+            })
+        else:
+            return Response({'followers': 0})
+
+    def put(self, request, sid):
+        queryset = shopFollowers.objects.filter(shopid=sid)
+        if queryset.exists():
+            shopfollowers = queryset.first()
+            serializer = ShopFollowersSerializer(
+                shopfollowers, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'followers updated'})
+            else:
+                return Response(serializer.errors, status=400)
+        else:
+            serializer = ShopFollowersSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg': 'followers created'})
+            else:
+                return Response(serializer.errors, status=400)
+
+
+class ChildCategory(APIView):
+    def get(self, request, id):
+        queryset = Categories.objects.filter(parent=id)
+        serializer = CategoriesSerializer(queryset)
+
+        if queryset.exists():
+            # Get the first instance from the queryset
+            serializer = CategoriesSerializer(queryset, context={
+                                              "request": request}, many=True)
+            return Response({'categories': serializer.data})
+        else:
+            return Response({
+                'msg': 'done'
+            }, status=404)
+
+
+class OurAddsView(viewsets.ModelViewSet):
+    queryset = OurAdds.objects.all()
+    serializer_class = OurAddsSerializer
+
+
+class NotificationView(APIView):
+    def post(self, request):
+        users = User.objects.all()
+        notifications = []
+        print(request.data)
+        for user in users:
+            notification = Notification(
+                recipient=user,
+                type=request.data.get('type'),
+                is_read=False,
+                message=request.data.get('message')
+
+            )
+            notification.save()
+            notifications.append(notification)
+        serializer = NotificationSerializer(notification)
+        return Response({'msg': 'notification Sent'})
+
+    def get(self, request):
+        notifications = Notification.objects.all()
+        serializer = NotificationSerializer(
+            notifications, many=True, context={'request', request})
+        return Response(serializer.data)
+
+    def put(self, request, notification_id, uid):
+        try:
+            notification = Notification.objects.get(
+                id=notification_id, recipient=uid)
+        except Notification.DoesNotExist:
+            return Response({'error': 'Notification not found'}, status=404)
+
+        notification.is_read = True
+
+        notification.save()
+
+        serializer = NotificationSerializer(notification)
+        return Response(serializer.data)
+
+
+class AppNotification(APIView):
+    def get(self, request):
+        app_notification = Notification.objects.filter(
+            type='app notification', is_read=False)
+        serializer = NotificationSerializer(app_notification, many=True)
+
+        return Response(serializer.data)
+
+
+class OtherNotification(APIView):
+    def get(self, request):
+        notifications = Notification.objects.filter(
+            type='other notification', is_read=False)
+        serializer = NotificationSerializer(notifications, many=True)
+
+        return Response(serializer.data)
+
+
+class UserShops(APIView):
+    def get(self, request, uid):
+        queryset = Shop.objects.filter(owner=uid)
+        serializer = ShopSerializer(
+            queryset, many=True, )
+
+        if (queryset.exists()):
+            return Response(serializer.data)
+        else:
+            return Response({'msg': 'you haven\'nt created any Shop'})
 
 # # Create your views here.
 # # def Product_list(request):
