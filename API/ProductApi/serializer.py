@@ -1,5 +1,5 @@
 from rest_framework import serializers, validators
-from .models import Product, Shop, Categories, ProductImages, Color, Test, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, shopFollowers, UserLike
+from .models import Product, Shop, Categories, OurAdds, ProductImages, Color, Test, Notification, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, shopFollowers, UserLike
 import base64
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -76,7 +76,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'title', 'description', 'price', 'rating', 'brand', 'category',
-                  'thumbnail', 'seller', 'shop', 'proimages', 'uploaded_images', 'colors']
+                  'thumbnail', 'seller', 'shop', 'proimages', 'uploaded_images', 'colors', 'discount']
 
     def create(self, validated_data):
         uploaded_images = validated_data.pop('uploaded_images')
@@ -202,3 +202,16 @@ class UserLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserLike
         fields = '__all__'
+
+
+class OurAddsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OurAdds
+        fields = '__all__'
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        read_only_fields = ['recipient']

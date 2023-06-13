@@ -21,6 +21,7 @@ router.register('test', views.TestImage)
 router.register('profile', views.Profile)
 router.register('comment', views.CommentView)
 router.register('rating', views.RatingView)
+router.register('ouradds', views.OurAddsView)
 router.register('like', views.LikeView)
 # router.register('followers', views.FollowerView)
 
@@ -34,7 +35,7 @@ urlpatterns = [
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('login', views.Login.as_view()),
-    path('user', views.User.as_view()),
+    path('user', views.AuthUser.as_view()),
     path('signup', views.UserRegister.as_view()),
     path('logout', knox_views.LogoutView.as_view()),
     path('logoutall', knox_views.LogoutAllView.as_view()),
@@ -48,7 +49,15 @@ urlpatterns = [
     path('userlike/<int:uid>/<int:sid>', views.UserLikeView.as_view()),
     path('childCategory/<int:id>', views.ChildCategory.as_view()),
     path('userfollow/<int:uid>/<int:sid>', views.UserFollowerView.as_view()),
-    path('shopfollowers/<int:sid>', views.shopFollowView.as_view())
+    path('shopfollowers/<int:sid>', views.shopFollowView.as_view()),
+    path('discount', views.Discount.as_view()),
+    path('notification', views.NotificationView.as_view()),
+    path('notification/<str:uid>/<str:notification_id>/read',
+         views.NotificationView.as_view()),
+    path('app_notifications', views.AppNotification.as_view()),
+    path('other_notifications', views.OtherNotification.as_view()),
+    path('myshops/<int:uid>', views.UserShops.as_view())
+
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
