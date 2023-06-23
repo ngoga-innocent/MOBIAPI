@@ -479,7 +479,18 @@ class UserShops(APIView):
         else:
             return Response({'msg': 'you haven\'nt created any Shop'})
 
-# # Create your views here.
+
+class CallBack(APIView):
+    def post(self, request):
+        if request.method == 'POST':
+            status = request.POST.get('chargedCommission')
+
+            print(request.body)
+
+            return Response({'msg': 'status'})
+        else:
+            return Response({'msg': 'no data found'})
+        # # Create your views here.
 # # def Product_list(request):
 # #     products=Product.objects.all()
 # #     serializer=ProductSerializer(products,many=True)

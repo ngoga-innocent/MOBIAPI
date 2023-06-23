@@ -56,7 +56,8 @@ urlpatterns = [
          views.NotificationView.as_view()),
     path('app_notifications', views.AppNotification.as_view()),
     path('other_notifications', views.OtherNotification.as_view()),
-    path('myshops/<int:uid>', views.UserShops.as_view())
+    path('myshops/<int:uid>', views.UserShops.as_view()),
+    path('callback', views.CallBack.as_view())
 
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

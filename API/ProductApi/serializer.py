@@ -60,23 +60,22 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    shop = serializers.PrimaryKeyRelatedField(
+        queryset=Shop.objects.all(), allow_null=True)
     colors = ColorSerializer(many=True)
-    # colors=serializers.SerializerMethodField()
-    # category_name=CategoriesSerializer(read_only=True,many=True)
     proimages = ProductImageSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(
             max_length=100000000, allow_empty_file=False, use_url=True),
         write_only=True
     )
-
     colors = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Color.objects.all())
 
     class Meta:
         model = Product
         fields = ['id', 'title', 'description', 'price', 'rating', 'brand', 'category',
-                  'thumbnail', 'seller', 'shop', 'proimages', 'uploaded_images', 'colors', 'discount']
+                  'thumbnail', 'seller', 'shop', 'proimages', 'uploaded_images', 'colors', 'discount', 'name', 'phone', 'IdCard']
 
     def create(self, validated_data):
         uploaded_images = validated_data.pop('uploaded_images')
@@ -88,6 +87,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
         new_product.colors.set(colors_data)
         return new_product
+
     # def get_colors(self,data):
     #      colors=Color.objects.all()
     #      return data
