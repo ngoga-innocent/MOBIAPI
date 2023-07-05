@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-tq2faq55n=45w^b%ovp%h7s!@me))+!mca$#*&f=pij#dg5%ig
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','http://192.168.1.76','10.0.2.2']
+ALLOWED_HOSTS = ['localhost', 'http://192.168.1.76', '10.0.2.2']
 
 
 # Application definition
@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'ProductApi',
     'rest_framework',
-     'rest_framework_simplejwt',
-     'knox'
+    'rest_framework_simplejwt',
+    'knox'
 ]
 
 MIDDLEWARE = [
@@ -129,8 +129,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-MEDIA_ROOT=os.path.join(BASE_DIR,'media')
-MEDIA_URL="/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
 
 # REST_FRAMEWORK={
 # 'DEFAULT_PERMISSION_CLASSES':(
@@ -144,6 +144,9 @@ MEDIA_URL="/media/"
 # }
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ]
 
 }
 CORS_ORIGIN_ALLOW_ALL = True

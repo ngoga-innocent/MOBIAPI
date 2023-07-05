@@ -24,6 +24,8 @@ class Shop(models.Model):
     location = models.CharField(max_length=255)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     password = models.CharField(max_length=255, default='Ngoga')
+    idCard = models.ImageField(upload_to='Id')
+    image = models.ImageField(upload_to='Owners')
 
     def __str__(self):
         return self.name

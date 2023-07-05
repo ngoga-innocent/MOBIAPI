@@ -15,7 +15,7 @@ class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
         fields = ['id', 'name', 'profile', 'telephone',
-                  'location', 'owner', 'password', 'cover', 'email']
+                  'location', 'owner', 'password', 'cover', 'email', 'idCard', 'image']
 
         extra_kwargs = {
             "name": {

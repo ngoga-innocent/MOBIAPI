@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product, Categories, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, shopFollowers
@@ -12,6 +13,11 @@ from knox.auth import AuthToken
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
 from rest_framework.generics import RetrieveAPIView
+import requests
+import json
+from rest_framework.renderers import JSONRenderer
+from django.views.decorators.csrf import csrf_exempt
+import uuid
 
 
 class ProductApi(viewsets.ModelViewSet):
@@ -199,7 +205,9 @@ class AuthUser(APIView):
                 'user_info': {
                     'id': user.id,
                     'username': user.username,
-                    'email': user.email
+                    'email': user.email,
+                    'firstname': user.first_name,
+                    'secondName': user.last_name
                 }
             })
         else:
@@ -491,6 +499,108 @@ class CallBack(APIView):
         else:
             return Response({'msg': 'no data found'})
         # # Create your views here.
+
+
+def AuthPayment(request):
+    url = "https://payments.paypack.rw/api/auth/agents/authorize"
+
+    payload = json.dumps({
+        "client_id": "3282d7d6-151f-11ee-a49d-dead99b23929",
+        "client_secret": "c4dcc4f37d3c74d3b58d6e2b893eee3eda39a3ee5e6b4b0d3255bfef95601890afd80709"
+    })
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        # Replace <access_token> with the actual token value
+        'Authorization': 'Bearer {access_token}'
+    }
+
+    response = requests.post(url, headers=headers, data=payload)
+
+    return JsonResponse({'response': response.json()})
+##################### OLtramz payment ############################################################
+
+
+@csrf_exempt
+@api_view(('POST',))
+def Pays(request):
+    payer_telephone_number = request.data.get('payerTelephoneNumber')
+    amount = request.data.get('amount')
+    currency = request.data.get('currency')
+    description = request.data.get('description')
+    callback_url = request.data.get('callbackUrl')
+    merchantTransactionId = uuid.uuid4()
+    credentials = {
+        'client_id': 'mobishop',
+        'grant_type': 'client_credentials',
+        'client_secret': '78fd0071-dc5a-40b0-9776-27b823aba954',
+    }
+
+    # Send Authentication request
+    auth_response = requests.post(
+        'https://auth.oltranz.com/auth/realms/api/protocol/openid-connect/token', data=credentials)
+
+    # Check if the request was successful
+    if auth_response.status_code == requests.codes.ok:
+        # Access the response data
+        data = auth_response.json()
+        token = data['access_token']
+        headers = {
+            "Authorization": "Bearer " + token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        payments = {
+            'merchantTransactionId': str(merchantTransactionId),
+            'payerTelephoneNumber': payer_telephone_number,
+            'amount': amount,
+            'currency': 'RWF',
+            'description': 'payment',
+            'callbackUrl': 'https://ngoga.pythonanywhere.com/callback'
+        }
+        print(payer_telephone_number)
+
+        # Send Payments
+        send_payments_response = requests.post(
+            'https://payments.api.oltranz.com/api/v2/payments/mobile/collections',
+            data=json.dumps(payments),
+            headers=headers
+        )
+        return Response(send_payments_response.json(), content_type='application/json')
+    else:
+        # Handle the error case
+        return Response({'error': 'Authentication failed'}, status=auth_response.status_code, content_type='application/json')
+
+
+#################################################### Paypack payment ###############################
+# def Pays(request):
+#     if request.method == 'GET':
+#         amount = request.GET.get('amount')
+#         number = request.GET.get('number')
+#         url = "https://payments.paypack.rw/api/transactions/cashin?Idempotency-Key=OldbBsHAwAdcYalKLXuiMcqRrdEcDGRv"
+
+#         payload = json.dumps({
+#             "amounts": amount,
+#             "number": '0788886530'
+#         })
+#         headers = {
+#             'Content-Type': 'application/json',
+#             'Accept': 'application/json',
+#             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IktESkZHbCIsImVtYWlsIjoiYmlsbGlvbmRvbGxhcjAwNUBnbWFpbC5jb20iLCJtZXJjaGFudCI6IkdDSEtKNyIsInZlcmlmaWVkIjpmYWxzZSwiYWdlbnQiOiIzMjgyZDdkNi0xNTFmLTExZWUtYTQ5ZC1kZWFkOTliMjM5MjkiLCJ0eXBlIjoxLCJwZXJtIjoiMzI4MjNiNzgtMTUxZi0xMWVlLWE0OWQtZGVhZDk5YjIzOTI5IiwiZXhwIjoxNjg3OTAwMDAwLCJpYXQiOjE2ODc4OTkxMDAsImlzcyI6InBheXBhY2sucnciLCJzdWIiOiJhY2Nlc3MifQ.7GaGOCYtqgyxHGbiF3C-FhSyCJ8ZA6MvTj2vshhTse8'
+#         }
+
+#         response = requests.request("POST", url, headers=headers, data=payload)
+
+#         print(response.text)
+
+#         return JsonResponse({'response': response.json()})
+@csrf_exempt
+@api_view(['POST'])
+def callBack(request):
+    data = request.data
+
+    return Response({'message': data})
 # # def Product_list(request):
 # #     products=Product.objects.all()
 # #     serializer=ProductSerializer(products,many=True)
