@@ -4,10 +4,10 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from django.conf.urls.static import static
 from ProductApi import views
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+# from rest_framework_simplejwt.views import (
+#     TokenObtainPairView,
+#     TokenRefreshView,
+# )
 from knox import views as knox_views
 from . import settings
 
@@ -23,6 +23,7 @@ router.register('comment', views.CommentView)
 router.register('rating', views.RatingView)
 router.register('ouradds', views.OurAddsView)
 router.register('like', views.LikeView)
+
 # router.register('followers', views.FollowerView)
 
 # router.register('Product/category/<id:int>',views.ProductCategoryApi)
@@ -61,7 +62,18 @@ urlpatterns = [
     path('authpay', views.AuthPayment),
     path('pay', views.Pays),
     path('callback', views.callBack),
-
+    # path('api/social/google/', views.GoogleLogin.as_view(), name='google_login'),
+    path('auth/', include('allauth.urls')),
+    path('google', views.validate_google_token),
+    path('facebook', views.get_facebook_user_data),
+    path('sendemail', views.send_email),
+    path('getcode', views.getCode),
+    path('verify', views.VerifyCode),
+    path('updatepass', views.NewPassword),
+    path('shopcode', views.CreateShopCode),
+    path('shopverify', views.VerifyCode),
+    path('shoppass', views.ResetShopPassword.as_view()),
+    path('editShop', views.EditShop.as_view())
 
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

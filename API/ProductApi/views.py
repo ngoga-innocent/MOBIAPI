@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product, Categories, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, shopFollowers
+from .models import Product, Categories, ShopVerificationCode, VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
 from django.contrib.auth.models import User
 from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
 from rest_framework import status
@@ -12,12 +12,119 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.auth import AuthToken
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
+import secrets
+
 from rest_framework.generics import RetrieveAPIView
 import requests
 import json
 from rest_framework.renderers import JSONRenderer
 from django.views.decorators.csrf import csrf_exempt
 import uuid
+import facebook
+
+from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
+from social_django.utils import psa
+from requests.exceptions import HTTPError
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.core.mail import send_mail
+import random
+import string
+from django.utils import timezone
+User = get_user_model()
+
+# from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+# from rest_auth.registration.views import SocialLoginView
+
+### google Login ##########
+
+
+def generate_verification_code():
+    code = ''.join(random.choices(string.digits, k=6))
+    return code
+
+
+@api_view(('POST',))
+def validate_google_token(request):
+    try:
+        # Specify the Google OAuth 2.0 client ID for your application
+        CLIENT_ID = '12559458870-20d980i2a1ovnjeb675j3sgseg7mp6gr.apps.googleusercontent.com'
+        token = request.data.get('token')
+        # Verify and decode the token
+        id_info = id_token.verify_token(
+            token, google_requests.Request(), CLIENT_ID)
+
+        # Check if the token is valid and retrieve user information
+        if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            raise ValueError('Invalid token issuer.')
+
+        # Return the user information
+        User = get_user_model()
+        user, created = User.objects.get_or_create(email=id_info['email'])
+        user.first_name = id_info['given_name']
+        user.last_name = id_info['family_name']
+        user.username = id_info['given_name']
+        user.set_unusable_password()
+        user.save()
+        _, token = AuthToken.objects.create(user)
+        return Response({
+            'user_info': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            },
+            'token': token
+        })
+
+    except ValueError as e:
+        print(f'Token validation failed: {str(e)}')
+        return Response({'error': str(e)}, status=400)
+
+############# Facebook ##################
+
+
+@api_view(('POST',))
+def get_facebook_user_data(request):
+    # Or request.GET.get('access_token') if using query string
+    access_token = request.data.get('access_token')
+    client_id = '6682234685121551'
+    # Make a request to the Facebook Graph API
+    url = f'https://graph.facebook.com/me?access_token={access_token}&fields=id,name,email&client_id={client_id}'
+    response = requests.get(url)
+    data = response.json()
+
+    if response.status_code == 200:
+        data = response.json()
+        # Extract the relevant user data
+        user_id = data['id']
+        user_name = data['name']
+        user_email = data.get('email')
+
+        User = get_user_model()
+        user, created = User.objects.get_or_create(username=user_name)
+
+        user.username = user_name
+        user.email = user_email
+        user.set_unusable_password()
+        user.save()
+        _, token = AuthToken.objects.create(user)
+        return Response({
+            'user_info': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            },
+            'token': token
+        })
+
+        # Perform further processing or save the user data in your Django database
+        # ...
+
+    else:
+        return JsonResponse({'error': 'Failed to retrieve user data from Facebook'}, status=400)
 
 
 class ProductApi(viewsets.ModelViewSet):
@@ -39,6 +146,10 @@ class CategoriesApi(viewsets.ModelViewSet):
     serializer_class = CategoriesSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
+
+
+# class GoogleLogin(SocialLoginView):
+#     adapter_class = GoogleOAuth2Adapter
 
 
 class Discount(APIView):
@@ -70,6 +181,15 @@ class ShopApi(viewsets.ModelViewSet):
             serializer = ShopSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             shop = serializer.save()
+            subject = "Shop Created"
+            message = "Shop Account created Success"
+            email = request.data.get('email')
+            recipient = [email]
+            from_email = settings.EMAIL_HOST_USER
+            try:
+                send_mail(subject, message, from_email, recipient)
+            except:
+                return Response('Failed to create Shop', status=200)
             return Response({
                 "shop_info": {
                     "shop_name": shop.name,
@@ -162,10 +282,71 @@ class TestImage(viewsets.ModelViewSet):
 
 class UserRegister(APIView):
     def post(self, request):
+
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        code = generate_verification_code()
+        subject = "Mobishop Account Created"
+        message = f"Your account has been created with the username: {request.POST['username']},password:  {request.POST['password']},code: {code}"
+        recipient_list = [request.data['email']]
+        from_email = settings.EMAIL_HOST_USER
+        try:
+            sent = send_mail(subject, message, from_email, recipient_list)
+            if sent > 0:
+                user = serializer.save()
+                _, token = AuthToken.objects.create(user)
 
-        user = serializer.save()
+                return Response({
+                    'user_info': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'phone_number': user.phone_number,
+                    },
+                    'token': token
+                })
+            else:
+                return Response("failed to send Email", status=500)
+
+        except Exception as e:
+            return Response(str(e), status=500)
+
+# class Login(APIView):
+#     def post(self, request):
+
+#         serializer = AuthTokenSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data.get('user')
+#         _, token = AuthToken.objects.create(user)
+
+#         return Response({
+#             'user_info': {
+#                 'id': user.id,
+#                 'username': user.username,
+#                 'email': user.email
+#             },
+#             'token': token
+#         }, status=200)
+
+
+class Login(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not any([username]):
+            return Response({'error': 'Please provide either username, email, or phone number.'}, status=400)
+
+        user = None
+        if username:
+            user = User.objects.filter(username=username).first()
+        if not user and '@' in username:
+            user = User.objects.filter(email=username).first()
+        if not user and username.isdigit():
+            user = User.objects.filter(phone_number=username).first()
+
+        if not user or not user.check_password(password):
+            return Response({'error': 'Invalid credentials.'}, status=400)
 
         _, token = AuthToken.objects.create(user)
 
@@ -173,27 +354,64 @@ class UserRegister(APIView):
             'user_info': {
                 'id': user.id,
                 'username': user.username,
-                'email': user.email
+                'email': user.email,
+                'phone_number': user.phone_number
             },
             'token': token
         })
 
 
-class Login(APIView):
-    def post(self, request):
-        serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data.get('user')
-        _, token = AuthToken.objects.create(user)
+@api_view(['POST'])
+def getCode(request):
+    username = request.POST.get('username')
 
-        return Response({
-            'user_info': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email
-            },
-            'token': token
-        }, status=200)
+    try:
+        user = User.objects.get(email=username)
+    except:
+        return Response("User not found", status=500)
+
+    code = generate_verification_code()
+    subject = "Verification Code"
+    message = f"Dear {username}, Your Verification Code is {code}"
+    recipient_list = [user.email]
+    from_email = settings.EMAIL_HOST_USER
+    VerificationCode.objects.create(code=code, username=username)
+    send_mail(subject, message, from_email, recipient_list)
+    return Response("success", status=200)
+
+
+@api_view(['POST'])
+def VerifyCode(request):
+    code = request.POST.get('code')
+    email = request.POST.get('email')
+    # print(code, email)
+    try:
+        datacode = VerificationCode.objects.get(code=code, username=email)
+    except:
+        return Response("no matching Code", status=404)
+
+    time = timezone.now()
+    saved = datacode.created
+    difference = time-saved
+
+    if (difference.total_seconds() > 10*60):
+
+        return Response("expired", status=401)
+    else:
+        return Response("matching", status=200)
+
+
+@api_view(['POST'])
+def NewPassword(request):
+    new_pssword = request.POST.get('password')
+    email = request.POST.get('email')
+    try:
+        user = User.objects.get(email=email)
+        user.set_password(new_pssword)
+        user.save()
+        return Response({"success"}, status=200)
+    except:
+        return Response({"message:Error in Updating Password"}, status=401)
 
 
 class AuthUser(APIView):
@@ -246,16 +464,116 @@ class ShopLogin(APIView):
             return Response("Invalid Email or Password", status=status.HTTP_401_UNAUTHORIZED)
         serializer = ShopSerializer(shop)
         shop_info = serializer.data
+        # Generate a 32-byte random hexadecimal token
+        token = secrets.token_hex(32)
+
         return Response({
             'shop': {
                 'shop_id': shop_info.get('id'),
                 'shop_name': shop_info.get('name'),
                 'shop_profile': shop_info.get('profile'),
                 'shop_location': shop_info.get('location'),
-                'shop_tel': shop_info.get('telephone')
+                'shop_tel': shop_info.get('telephone'),
+                'token': token
 
             }
         }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def send_email(request):
+    subject = "Passowrd checking"
+    message = 'Am testing the email sending'
+    from_email = 'mobishop@gmail.com'
+    recipient_list = ['ngogainnocent1@gmail.com']
+    send_mail(subject, message, from_email, recipient_list)
+    return Response("email sent", status=200)
+
+
+class ResetShopPassword(APIView):
+    def put(self, request):
+        name = request.data.get('name')
+        password = request.data.get('name')
+        try:
+            shop = Shop.objects.get(name=name)
+        except shop.DoesNotExist:
+            return Response("Shop does not exists", status=status.HTTP_401_UNAUTHORIZED)
+        shop.password = make_password(password)
+        shop.save()
+
+        return Response("Success changed", status=200)
+
+
+@api_view(['POST'])
+def CreateShopCode(request):
+    name = request.POST.get('name')
+    try:
+        shop = Shop.objects.get(name=name)
+        if (shop):
+            code = generate_verification_code()
+            ShopVerificationCode.objects.create(name=name, code=code)
+
+            subject = "Shop code"
+            message = f"shop verification code is {code}"
+            recipient = [shop.email]
+            from_email = settings.EMAIL_HOST_USER
+            try:
+                send_mail(subject, message, from_email, recipient)
+                return Response('sent')
+            except:
+                return Response("not sent")
+
+    except:
+        return Response('no shop', status=404)
+
+
+@api_view(['POST'])
+def VerifyCode(request):
+    code = request.POST.get('code')
+    name = request.POST.get('name')
+    # print(code, email)
+    try:
+        datacode = ShopVerificationCode.objects.get(code=code, name=name)
+    except:
+        return Response("no matching Code", status=404)
+
+    time = timezone.now()
+    saved = datacode.created
+    difference = time-saved
+
+    if (difference.total_seconds() > 10*60):
+
+        return Response("expired", status=401)
+    else:
+        return Response("matching", status=200)
+
+
+class EditShop(APIView):
+    def put(self, request):
+        name = request.data.get('name')
+        location = request.data.get('location')
+        phone = request.data.get('phone_number')
+        profile = request.data.get('profile')
+        cover = request.data.get('cover')
+        try:
+            shop = Shop.objects.get(name=name)
+        except:
+            return Response("shop not found", status=401)
+        shop.location = location
+        shop.telephone = phone
+        shop.profile = profile
+        shop.cover = cover
+
+        try:
+            shop.save()
+            subject = 'Shop Update'
+            message = 'Shop information updated'
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [shop.email]
+            send_mail(subject, message, from_email, recipient_list)
+            return Response("success", status=200)
+        except:
+            return Response("failed to Edit", status=401)
 
 
 class SingleShop(APIView):
@@ -366,7 +684,7 @@ class UserLikeView(APIView):
 
 class shopFollowView(APIView):
     def get(self, request, sid):
-        queryset = shopFollowers.objects.filter(shopid=sid)
+        queryset = ShopFollowers.objects.filter(shopid=sid)
         serializer = ShopFollowersSerializer(
             queryset, many=True, context={'request': request})
 
@@ -379,7 +697,7 @@ class shopFollowView(APIView):
             return Response({'followers': 0})
 
     def put(self, request, sid):
-        queryset = shopFollowers.objects.filter(shopid=sid)
+        queryset = ShopFollowers.objects.filter(shopid=sid)
         if queryset.exists():
             shopfollowers = queryset.first()
             serializer = ShopFollowersSerializer(

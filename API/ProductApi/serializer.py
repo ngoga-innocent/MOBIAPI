@@ -1,11 +1,12 @@
 from rest_framework import serializers, validators
-from .models import Product, Shop, Categories, OurAdds, ProductImages, Color, Test, Notification, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, shopFollowers, UserLike
+from .models import Product, Shop, Categories, OurAdds, ProductImages, Color, Test, Notification, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, ShopFollowers, UserLike
 import base64
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import get_user_model
 from django.contrib.auth.hashers import make_password
-# from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 
 # User=get_user_model()
+User = get_user_model()
 
 
 class ShopSerializer(serializers.ModelSerializer):
@@ -99,14 +100,21 @@ class TestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'first_name', 'last_name']
+        fields = ['username', 'email', 'password',
+                  'first_name', 'last_name', 'phone_number']
 
         extra_kwargs = {
-            "pasword": {"write_only": True},
+            "password": {"write_only": True},
             "email": {
                 "allow_blank": False,
                 "required": True,
@@ -125,9 +133,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         first_name = validated_data.get('first_name')
         last_name = validated_data.get('last_name')
         password = validated_data.get('password')
+        phone_number = validated_data.get('phone_number')
 
         user = User(username=username, email=email,
-                    first_name=first_name, last_name=last_name)
+                    first_name=first_name, last_name=last_name, phone_number=phone_number)
 
         user.set_password(password)
         user.save()
@@ -194,7 +203,7 @@ class FollowersSerializer(serializers.ModelSerializer):
 
 class ShopFollowersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = shopFollowers
+        model = ShopFollowers
         fields = '__all__'
 
 
