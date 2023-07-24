@@ -491,9 +491,9 @@ def send_email(request):
 
 
 class ResetShopPassword(APIView):
-    def put(self, request):
+    def post(self, request):
         name = request.data.get('name')
-        password = request.data.get('name')
+        password = request.data.get('password')
         try:
             shop = Shop.objects.get(name=name)
         except shop.DoesNotExist:
@@ -501,7 +501,7 @@ class ResetShopPassword(APIView):
         shop.password = make_password(password)
         shop.save()
 
-        return Response("Success changed", status=200)
+        return Response("success", status=200)
 
 
 @api_view(['POST'])
@@ -534,18 +534,17 @@ def VerifyCode(request):
     # print(code, email)
     try:
         datacode = ShopVerificationCode.objects.get(code=code, name=name)
+        time = timezone.now()
+        saved = datacode.created
+        difference = time-saved
+
+        if (difference.total_seconds() > 10*60):
+
+            return Response(" code expired", status=401)
+        else:
+            return Response("matching", status=200)
     except:
-        return Response("no matching Code", status=404)
-
-    time = timezone.now()
-    saved = datacode.created
-    difference = time-saved
-
-    if (difference.total_seconds() > 10*60):
-
-        return Response("expired", status=401)
-    else:
-        return Response("matching", status=200)
+        return Response("Invalid verification Code", status=404)
 
 
 class EditShop(APIView):
