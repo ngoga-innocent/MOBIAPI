@@ -195,3 +195,12 @@ class Notification(models.Model):
 class OurAdds(models.Model):
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='our Adds')
+class Payment(models.Model):
+    transId=models.CharField(max_length=255)
+    telephone=models.CharField(max_length=255)
+    amount=models.IntegerField()
+    statusCode=models.IntegerField()
+    status=models.CharField(max_length=255)
+    trackId=models.CharField(max_length=255)
+    description=models.TextField()
+

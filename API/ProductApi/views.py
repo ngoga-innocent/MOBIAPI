@@ -1,7 +1,7 @@
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product, Categories, ShopVerificationCode, VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
+from .models import Product, Categories, ShopVerificationCode,Payment, VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
 from django.contrib.auth.models import User
 from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
 from rest_framework import status
@@ -13,7 +13,7 @@ from knox.auth import AuthToken
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
 import secrets
-
+import os
 from rest_framework.generics import RetrieveAPIView
 import requests
 import json
@@ -34,6 +34,7 @@ from django.core.mail import send_mail
 import random
 import string
 from django.utils import timezone
+import json
 User = get_user_model()
 
 # from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -874,9 +875,9 @@ def Pays(request):
             'amount': amount,
             'currency': 'RWF',
             'description': 'payment',
-            'callbackUrl': 'https://ngoga.pythonanywhere.com/callback'
+            'callbackUrl': 'https://897b-2c0f-eb68-62c-9f00-556-6067-87d3-5a6.ngrok-free.app/callback'
         }
-        print(payer_telephone_number)
+        
 
         # Send Payments
         send_payments_response = requests.post(
@@ -884,6 +885,13 @@ def Pays(request):
             data=json.dumps(payments),
             headers=headers
         )
+        response=send_payments_response.json()
+        transId=response.get('basePayTransactionId')
+        status=response.get('status')
+        desc=response.get('description')
+        payment=Payment(transId=merchantTransactionId,telephone=payer_telephone_number,amount=amount,statusCode=401,status=status,trackId=transId,description=desc)
+        payment.save()
+
         return Response(send_payments_response.json(), content_type='application/json')
     else:
         # Handle the error case
@@ -912,12 +920,48 @@ def Pays(request):
 #         print(response.text)
 
 #         return JsonResponse({'response': response.json()})
-@csrf_exempt
-@api_view(['POST'])
-def callBack(request):
-    data = request.data
 
-    return Response({'message': data})
+
+@csrf_exempt
+@api_view(('POST',))
+def callBack(request):
+    
+    
+    if request.method == 'POST':
+        try:
+            body_data = request.data
+            payer_telephone_number = request.data.get('payerTelephoneNumber')
+            amount = request.data.get('amount')
+            currency = request.data.get('currency')
+            description = request.data.get('description')
+            trackId=request.data.get('trackId')
+            transId=request.data.get('merchantTransactionId')
+            status=request.data.get('status')
+            statusCode=request.data.get('statusCode')
+            print(body_data)
+            payment=Payment.objects.get(transId=transId)
+
+            payment.status=status
+            payment.statusCode=statusCode
+            payment.description=description
+
+            payment.save()
+            
+            if statusCode !=200:
+                return Response({'message':'failed'},status=401)
+            return Response({'message':'success'},status=200)
+              # Read the request body only once
+            # data = json.loads(body_data)
+            
+            # Process the data and perform necessary actions
+            
+            # response_data = {'message': 'Callback data processed successfully'}
+            # return Response({'message':body_data})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'})
+
 # # def Product_list(request):
 # #     products=Product.objects.all()
 # #     serializer=ProductSerializer(products,many=True)
@@ -938,3 +982,7 @@ def callBack(request):
 
 #         else:
 #             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+def serve_assetlinks_json(request):
+    assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'assetlinks.json')
+    with open(assetlinks_json_path, 'r') as file:
+        return HttpResponse(file.read(), content_type='application/json')

@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-tq2faq55n=45w^b%ovp%h7s!@me))+!mca$#*&f=pij#dg5%ig
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
-                 '10.0.2.2:8001', '8694-2c0f-eb68-62c-9f00-d1f1-d62-385f-4b64.ngrok-free.app']
+                 '10.0.2.2:8001', '897b-2c0f-eb68-62c-9f00-556-6067-87d3-5a6.ngrok-free.app']
 
 # AUTHENTICATION BACKENDS
 AUTHENTICATION_BACKENDS = [

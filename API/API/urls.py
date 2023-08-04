@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from django.conf.urls.static import static
 from ProductApi import views
+import os
 # from rest_framework_simplejwt.views import (
 #     TokenObtainPairView,
 #     TokenRefreshView,
@@ -43,7 +44,7 @@ urlpatterns = [
     path('userprofile/<int:id>', views.Getprofile.as_view()),
     path('shoplogin', views.ShopLogin.as_view()),
     path('shop/<int:shopid>', views.SingleShop.as_view()),
-
+   
     path('shopcomment/<int:id>', views.ShopComment.as_view()),
     path('shopLike/<int:id>', views.ShopLike.as_view()),
     path('shoprate/<int:id>', views.ShopRating.as_view()),
@@ -58,10 +59,10 @@ urlpatterns = [
     path('app_notifications', views.AppNotification.as_view()),
     path('other_notifications', views.OtherNotification.as_view()),
     path('myshops/<int:uid>', views.UserShops.as_view()),
-    path('callback', views.CallBack.as_view()),
+    # path('callback', views.CallBack.as_view()),
     path('authpay', views.AuthPayment),
     path('pay', views.Pays),
-    path('callback', views.callBack),
+     path('callback', views.callBack),
     # path('api/social/google/', views.GoogleLogin.as_view(), name='google_login'),
     path('auth/', include('allauth.urls')),
     path('google', views.validate_google_token),
@@ -73,7 +74,8 @@ urlpatterns = [
     path('shopcode', views.CreateShopCode),
     path('shopverify', views.VerifyCode),
     path('shoppass', views.ResetShopPassword.as_view()),
-    path('editShop', views.EditShop.as_view())
+    path('editShop', views.EditShop.as_view()),
+    path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
 
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
