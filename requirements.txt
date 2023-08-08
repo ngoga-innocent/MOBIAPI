@@ -39,7 +39,7 @@ pyasn1==0.5.0
 pyasn1-modules==0.3.0
 pycparser==2.21
 PyJWT==2.7.0
-python-dotenv== 0.21.1
+python-dotenv==0.21.1
 python3-openid==3.2.0
 pytz==2023.3
 requests==2.31.0
@@ -54,4 +54,3 @@ typing_extensions==4.7.1
 tzdata==2023.3
 urllib3==1.26.16
 wrapt==1.15.0
-wheel
