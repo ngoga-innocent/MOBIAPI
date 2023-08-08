@@ -32,6 +32,7 @@ router.register('like', views.LikeView)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
+    path('chat',include('Chat.urls')),
     path('Product/shop/<int:id>', views.ShopProduct.as_view()),
     path('Product/category/<int:id>', views.ProductCategoryApi.as_view()),
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -60,7 +61,7 @@ urlpatterns = [
     path('other_notifications', views.OtherNotification.as_view()),
     path('myshops/<int:uid>', views.UserShops.as_view()),
     # path('callback', views.CallBack.as_view()),
-    path('authpay', views.AuthPayment),
+    # path('authpay', views.AuthPayment),
     path('pay', views.Pays),
      path('callback', views.callBack),
     # path('api/social/google/', views.GoogleLogin.as_view(), name='google_login'),
@@ -75,6 +76,7 @@ urlpatterns = [
     path('shopverify', views.VerifyCode),
     path('shoppass', views.ResetShopPassword.as_view()),
     path('editShop', views.EditShop.as_view()),
+    path('verification',views.faceVerification),
     path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
 
 

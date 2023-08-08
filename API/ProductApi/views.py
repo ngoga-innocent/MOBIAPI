@@ -21,7 +21,7 @@ from rest_framework.renderers import JSONRenderer
 from django.views.decorators.csrf import csrf_exempt
 import uuid
 import facebook
-
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from social_django.utils import psa
@@ -35,6 +35,7 @@ import random
 import string
 from django.utils import timezone
 import json
+import face_recognition
 User = get_user_model()
 
 # from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -52,7 +53,7 @@ def generate_verification_code():
 def validate_google_token(request):
     try:
         # Specify the Google OAuth 2.0 client ID for your application
-        CLIENT_ID = '12559458870-20d980i2a1ovnjeb675j3sgseg7mp6gr.apps.googleusercontent.com'
+        CLIENT_ID = os.environ.get("GOOGLE_ID")
         token = request.data.get('token')
         # Verify and decode the token
         id_info = id_token.verify_token(
@@ -91,7 +92,7 @@ def validate_google_token(request):
 def get_facebook_user_data(request):
     # Or request.GET.get('access_token') if using query string
     access_token = request.data.get('access_token')
-    client_id = '6682234685121551'
+    client_id = os.environ.get("FB_ID")
     # Make a request to the Facebook Graph API
     url = f'https://graph.facebook.com/me?access_token={access_token}&fields=id,name,email&client_id={client_id}'
     response = requests.get(url)
@@ -819,24 +820,24 @@ class CallBack(APIView):
         # # Create your views here.
 
 
-def AuthPayment(request):
-    url = "https://payments.paypack.rw/api/auth/agents/authorize"
+# def AuthPayment(request):
+#     url = "https://payments.paypack.rw/api/auth/agents/authorize"
 
-    payload = json.dumps({
-        "client_id": "3282d7d6-151f-11ee-a49d-dead99b23929",
-        "client_secret": "c4dcc4f37d3c74d3b58d6e2b893eee3eda39a3ee5e6b4b0d3255bfef95601890afd80709"
-    })
+#     payload = json.dumps({
+#         "client_id": "3282d7d6-151f-11ee-a49d-dead99b23929",
+#         "client_secret": "c4dcc4f37d3c74d3b58d6e2b893eee3eda39a3ee5e6b4b0d3255bfef95601890afd80709"
+#     })
 
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        # Replace <access_token> with the actual token value
-        'Authorization': 'Bearer {access_token}'
-    }
+#     headers = {
+#         'Content-Type': 'application/json',
+#         'Accept': 'application/json',
+#         # Replace <access_token> with the actual token value
+#         'Authorization': 'Bearer {access_token}'
+#     }
 
-    response = requests.post(url, headers=headers, data=payload)
+#     response = requests.post(url, headers=headers, data=payload)
 
-    return JsonResponse({'response': response.json()})
+#     return JsonResponse({'response': response.json()})
 ##################### OLtramz payment ############################################################
 
 
@@ -850,9 +851,12 @@ def Pays(request):
     callback_url = request.data.get('callbackUrl')
     merchantTransactionId = uuid.uuid4()
     credentials = {
-        'client_id': 'mobishop',
+        # 'client_id': 'mobishop',
+        # 'grant_type': 'client_credentials',
+        # 'client_secret': '78fd0071-dc5a-40b0-9776-27b823aba954',
+        'client_id': os.environ.get("OLTRANZ_ID"),
         'grant_type': 'client_credentials',
-        'client_secret': '78fd0071-dc5a-40b0-9776-27b823aba954',
+        'client_secret': os.environ.get("OLTRANZ_SECRET"),
     }
 
     # Send Authentication request
@@ -875,7 +879,8 @@ def Pays(request):
             'amount': amount,
             'currency': 'RWF',
             'description': 'payment',
-            'callbackUrl': 'https://897b-2c0f-eb68-62c-9f00-556-6067-87d3-5a6.ngrok-free.app/callback'
+            # 'callbackUrl': 'https://897b-2c0f-eb68-62c-9f00-556-6067-87d3-5a6.ngrok-free.app/callback'
+            'callbackUrl':os.environ.get("CALLBACK_URL")
         }
         
 
@@ -986,3 +991,31 @@ def serve_assetlinks_json(request):
     assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'assetlinks.json')
     with open(assetlinks_json_path, 'r') as file:
         return HttpResponse(file.read(), content_type='application/json')
+@csrf_exempt
+@api_view(('POST',))
+def faceVerification(request):
+    if request.method=='POST':
+        try:
+            id_image=request.FILES['Idcard']
+            selfie=request.FILES['image']
+
+            id_Image=face_recognition.load_image_file(id_image)
+            selfie_Image=face_recognition.load_image_file(selfie)
+
+    #ectract facial features 
+            document_face_encoding = face_recognition.face_encodings(id_Image)[0]
+            selfie_face_encoding = face_recognition.face_encodings(selfie_Image)[0]
+
+     # Compare the facial features
+            similarity = face_recognition.face_distance([document_face_encoding], selfie_face_encoding)[0]
+    # Define a verification threshold (e.g., 0.6)
+            verification_threshold = 0.6
+            if similarity < verification_threshold:
+                
+                return JsonResponse({'message': 'KYC verified'},status=200)
+            else:
+                return JsonResponse({'message': 'Face verification failed'},status=405)
+        except MultiValueDictKeyError as e:
+            return JsonResponse({'error':'error field not found'})
+    else:
+        return JsonResponse({'error':'invalid request method '},status=405)

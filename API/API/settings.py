@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
+from dotenv import load_dotenv
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,14 +24,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tq2faq55n=45w^b%ovp%h7s!@me))+!mca$#*&f=pij#dg5%ig'
-
+# SECRET_KEY = 'django-insecure-tq2faq55n=45w^b%ovp%h7s!@me))+!mca$#*&f=pij#dg5%ig'
+SECRET_KEY=os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG","False").lower()=="true"
 
-ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
-                 '10.0.2.2:8001', '897b-2c0f-eb68-62c-9f00-556-6067-87d3-5a6.ngrok-free.app']
-
+# ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
+#                  '10.0.2.2:8001', 'ac3c-102-22-173-142.ngrok-free.app']
+ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
 # AUTHENTICATION BACKENDS
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -49,9 +52,13 @@ SOCIAL_AUTH_PIPELINE = (
 )
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        # 'APP': {
+        #     'client_id': '167295371726-ehft9nrhuics6fba380p0vpl8h6o646j.apps.googleusercontent.com',
+        #     'secret': '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'
+        # },
         'APP': {
-            'client_id': '167295371726-ehft9nrhuics6fba380p0vpl8h6o646j.apps.googleusercontent.com',
-            'secret': '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'
+            'client_id': os.environ.get("CLIENT_ID"),
+            'secret': os.environ.get("SECRET")
         },
         'SCOPE': [
             'profile',
@@ -75,6 +82,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'corsheaders',
     'ProductApi',
+    'Chat',
     'rest_framework',
     # 'rest_framework_simplejwt',
     'rest_framework.authtoken',
@@ -84,6 +92,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
+    # 'channels',
 
     'knox',
 
@@ -108,7 +117,7 @@ ROOT_URLCONF = 'API.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR /'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,7 +131,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'API.wsgi.application'
-
+# ASGI_APPLICATION='API.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -133,8 +142,10 @@ DATABASES = {
         'NAME': BASE_DIR / 'Db',
     }
 }
+database_url=os.environ.get("DATABASE_URL")
+DATABASES['default']=dj_database_url.parse(database_url)
 
-
+#postgres://mobileshopdb_user:xePI0x6hUp4g56iSJJjQIfsPA3no6O7w@dpg-cj9129ivvtos73840hlg-a.oregon-postgres.render.com/mobileshopdb
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
