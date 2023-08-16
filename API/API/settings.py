@@ -29,9 +29,9 @@ SECRET_KEY=os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG","False").lower()=="true"
 
-# ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
-#                  '10.0.2.2:8001', 'ac3c-102-22-173-142.ngrok-free.app']
-ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
+                 '10.0.2.2:8001', 'fe7d-2c0f-eb68-62c-9f00-fc63-4202-ba36-523.ngrok-free.app']
+# ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
 # AUTHENTICATION BACKENDS
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -143,7 +143,7 @@ DATABASES = {
     }
 }
 database_url=os.environ.get("DATABASE_URL")
-DATABASES['default']=dj_database_url.parse(database_url)
+# DATABASES['default']=dj_database_url.parse(database_url)
 
 #postgres://mobileshopdb_user:xePI0x6hUp4g56iSJJjQIfsPA3no6O7w@dpg-cj9129ivvtos73840hlg-a.oregon-postgres.render.com/mobileshopdb
 # Password validation

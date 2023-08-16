@@ -1,5 +1,5 @@
 from rest_framework import serializers, validators
-from .models import Product, Shop, Categories, OurAdds, ProductImages, Color, Test, Notification, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, ShopFollowers, UserLike
+from .models import Product, Shop, Categories, OurAdds, ProductImages, Color, FreeCredit,Test, Notification, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, ShopFollowers, UserLike
 import base64
 # from django.contrib.auth.models import get_user_model
 from django.contrib.auth.hashers import make_password
@@ -224,3 +224,20 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
         read_only_fields = ['recipient']
+# class CreditSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = FreeCredit
+#         fields = [ 'user', 'credit']
+
+#     def create(self, validated_data):
+#         user = validated_data.get('user')
+#         if id:
+#             # Update an existing item
+#             item = FreeCredit.objects.get(user=user)
+#             for attr, value in validated_data.items():
+#                 setattr(item, attr, value)
+#             item.save()
+#         else:
+#             # Create a new item
+#             item = FreeCredit.objects.create(**validated_data)
+#         return item

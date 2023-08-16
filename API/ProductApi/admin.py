@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Categories, Product, Shop, Color, ProductImages, Test, UserProfile, ProfileImages, ShopVerificationCode, VerificationCode, UserLike, UserFollow, CustomUser,ShopFollowers,Like,Payment
+from .models import Categories, Product, Shop, Color, FreeCredit,ProductImages, Test, UserProfile, ProfileImages, ShopVerificationCode, VerificationCode, UserLike, UserFollow, CustomUser,ShopFollowers,Like,Payment
 # Register your models here.
 from django.contrib.auth import get_user_model
 
@@ -18,4 +18,5 @@ admin.site.register(get_user_model())
 admin.site.register(ShopFollowers)
 admin.site.register(Like)
 admin.site.register(Payment)
+admin.site.register(FreeCredit)
 

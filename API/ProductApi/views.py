@@ -1,7 +1,7 @@
 from django.http import JsonResponse,HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product, Categories, ShopVerificationCode,Payment, VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
+from .models import Product, Categories, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
 from django.contrib.auth.models import User
 from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
 from rest_framework import status
@@ -312,6 +312,35 @@ class UserRegister(APIView):
 
         except Exception as e:
             return Response(str(e), status=500)
+@csrf_exempt
+@api_view(['POST',])
+def CreditView(request):
+    credits=request.data.get('credit')
+    userReceived=request.data.get('user')
+    try:
+        user=User.objects.get(pk=userReceived)
+        credit,created=FreeCredit.objects.update_or_create(user=user,defaults={'credits':credits})
+        if created:
+            message='User with credits created'
+        else:
+            message='user Credits Update'
+
+        return Response({'message',message},status=201 )
+    except User.DoesNotExist:
+       return Response({'message':'User not exists'},status=200)
+    # 
+
+    # usercredit=FreeCredit.objects.get(user=user)
+    # if(usercredit):
+    #     usercredit.credits=credits
+    #     usercredit.save()
+    # else:
+    #     credit=FreeCredit.objects.create(user=user,credits=credits)
+    #     return Response({'user credits create'},status=200)
+    
+ 
+
+
 
 # class Login(APIView):
 #     def post(self, request):
@@ -879,8 +908,8 @@ def Pays(request):
             'amount': amount,
             'currency': 'RWF',
             'description': 'payment',
-            # 'callbackUrl': 'https://897b-2c0f-eb68-62c-9f00-556-6067-87d3-5a6.ngrok-free.app/callback'
-            'callbackUrl':os.environ.get("CALLBACK_URL")
+            'callbackUrl': 'https://0c84-102-22-173-142.ngrok-free.app/callback'
+            # 'callbackUrl':os.environ.get("CALLBACK_URL")
         }
         
 
@@ -891,10 +920,11 @@ def Pays(request):
             headers=headers
         )
         response=send_payments_response.json()
+        print(response)
         transId=response.get('basePayTransactionId')
         status=response.get('status')
         desc=response.get('description')
-        payment=Payment(transId=merchantTransactionId,telephone=payer_telephone_number,amount=amount,statusCode=401,status=status,trackId=transId,description=desc)
+        payment=Payment(transId=transId,telephone=payer_telephone_number,amount=amount,statusCode=401,status=status,trackId=merchantTransactionId,description=desc)
         payment.save()
 
         return Response(send_payments_response.json(), content_type='application/json')
@@ -936,25 +966,33 @@ def callBack(request):
         try:
             body_data = request.data
             payer_telephone_number = request.data.get('payerTelephoneNumber')
-            amount = request.data.get('amount')
+            amount = request.data.get('collectedAmount')
             currency = request.data.get('currency')
             description = request.data.get('description')
             trackId=request.data.get('trackId')
-            transId=request.data.get('merchantTransactionId')
+            transId=request.data.get('basePayTransactionId')
             status=request.data.get('status')
             statusCode=request.data.get('statusCode')
-            print(body_data)
+            # print(body_data)
             payment=Payment.objects.get(transId=transId)
+            if payment:
+                # print("found")
+                # payment, created = Payment.objects.update_or_create(transId=transId,telephone=payer_telephone_number,amount=amount,statusCode=statusCode,status=status,trackId=transId,description=description)
+                payment.status=status
+                payment.statusCode=statusCode
+                payment.description=description
+                payment.save()
+                if statusCode !=200:
+                    return Response({'message':'failed'},status=401)
+                else:
+                    return Response({'message':'success'},status=200)
 
-            payment.status=status
-            payment.statusCode=statusCode
-            payment.description=description
-
-            payment.save()
+            else:
+                print('payment not found')
+                return Response({'message':'not found'},status=404)
+            # payment.save()
             
-            if statusCode !=200:
-                return Response({'message':'failed'},status=401)
-            return Response({'message':'success'},status=200)
+         
               # Read the request body only once
             # data = json.loads(body_data)
             
@@ -963,9 +1001,29 @@ def callBack(request):
             # response_data = {'message': 'Callback data processed successfully'}
             # return Response({'message':body_data})
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'})
+            return Response({'error': 'Invalid JSON data'})
     else:
-        return JsonResponse({'error': 'Invalid request method'})
+        return Response({'error': 'Invalid request method'})
+@csrf_exempt
+@api_view(('POST',))
+def CheckStatus(request):
+    trackid=request.data.get('trackId')
+
+    transaction=Payment.objects.get(transId=trackid)
+    if transaction:
+        try:
+            print(transaction.status)
+            Status=transaction.status
+            if(Status=='SUCCESS'):
+                return Response({'status':Status},status=200)
+            elif(Status=='PENDING'):
+                return Response({'status':Status},status=201)
+            elif(Status=='UNKNOWN'):
+                return Response({'status':'PENDING'},status=400)
+            else:
+                return Response({'status':Status},status=401)
+        except:
+            return Response({"message":"Not found"},status=404)
 
 # # def Product_list(request):
 # #     products=Product.objects.all()

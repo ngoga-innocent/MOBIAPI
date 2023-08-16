@@ -24,7 +24,7 @@ router.register('comment', views.CommentView)
 router.register('rating', views.RatingView)
 router.register('ouradds', views.OurAddsView)
 router.register('like', views.LikeView)
-
+# router.register('freecredit',views.FreeCredit)
 # router.register('followers', views.FollowerView)
 
 # router.register('Product/category/<id:int>',views.ProductCategoryApi)
@@ -77,6 +77,8 @@ urlpatterns = [
     path('shoppass', views.ResetShopPassword.as_view()),
     path('editShop', views.EditShop.as_view()),
     path('verification',views.faceVerification),
+    path('paymentStatus',views.CheckStatus),
+    path('freeCredits',views.CreditView),
     path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
 
 

@@ -39,7 +39,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser):
     email = models.CharField(max_length=255, unique=True, null=True)
     username = models.CharField(max_length=255, unique=True)
-    phone_number = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=255,default='')
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
     is_active = models.BooleanField(default=True)
@@ -204,3 +204,6 @@ class Payment(models.Model):
     trackId=models.CharField(max_length=255)
     description=models.TextField()
 
+class FreeCredit(models.Model):
+    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    credits=models.IntegerField()
