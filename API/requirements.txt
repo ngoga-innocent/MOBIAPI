@@ -11,8 +11,7 @@ Deprecated==1.2.14
 dj-database-url==2.0.0
 dj-rest-auth==4.0.1
 dj-rest-auth-social==2.2.4
-djando==0.2
-Django==3.2.20
+Django==4.2.1
 django-allauth==0.54.0
 django-braces==1.15.0
 django-cors-headers==3.14.0
