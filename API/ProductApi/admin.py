@@ -2,6 +2,16 @@ from django.contrib import admin
 from .models import Categories, Product, Shop, Color, FreeCredit,ProductImages, Test, UserProfile, ProfileImages, ShopVerificationCode, VerificationCode, UserLike, UserFollow, CustomUser,ShopFollowers,Like,Payment
 # Register your models here.
 from django.contrib.auth import get_user_model
+from .models import CustomUserManager
+from django.contrib.auth.admin import UserAdmin
+
+# class CustomUserAdmin(UserAdmin):
+#     fieldsets=(
+#         *UserAdmin.fieldsets,
+#         ('Custom Fields',{'fields':('phone_number',)})
+#     )
+#     filter_horizontal = (*UserAdmin.filter_horizontal, )
+#     list_filter = (*UserAdmin.list_filter, )
 
 admin.site.register(Categories)
 admin.site.register(Product)
@@ -19,4 +29,5 @@ admin.site.register(ShopFollowers)
 admin.site.register(Like)
 admin.site.register(Payment)
 admin.site.register(FreeCredit)
+# admin.site.register(CustomUser,CustomUserAdmin)
 
