@@ -36,6 +36,9 @@ import string
 from django.utils import timezone
 import json
 import face_recognition
+from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import render
 User = get_user_model()
 
 # from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -72,7 +75,28 @@ def validate_google_token(request):
         user.set_unusable_password()
         user.save()
         _, token = AuthToken.objects.create(user)
-        return Response({
+        if created:
+            credits=20000
+            print ('user created',user.id)
+            try:
+                creditsuser=User.objects.get(pk=user.id)
+                credit,created=FreeCredit.objects.update_or_create(user=creditsuser,defaults={'credits':credits})
+                if created:
+                    message='User with credits created'
+                else:
+                    message='user Credits Update'
+
+                return Response({'message':message,'user_info': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            },'token': token},status=201 )
+            except User.DoesNotExist:
+                return Response({'message':'User not exists'},status=200)
+        
+        else:
+            print('user just logged in')
+            return Response({
             'user_info': {
                 'id': user.id,
                 'username': user.username,
@@ -86,7 +110,8 @@ def validate_google_token(request):
         return Response({'error': str(e)}, status=400)
 
 ############# Facebook ##################
-
+def Home(request):
+    return render(request,'Product/home.html')
 
 @api_view(('POST',))
 def get_facebook_user_data(request):
@@ -113,7 +138,28 @@ def get_facebook_user_data(request):
         user.set_unusable_password()
         user.save()
         _, token = AuthToken.objects.create(user)
-        return Response({
+        if created:
+            credits=20000
+            print ('user created',user.id)
+            try:
+                creditsuser=User.objects.get(pk=user.id)
+                credit,created=FreeCredit.objects.update_or_create(user=creditsuser,defaults={'credits':credits})
+                if created:
+                    message='User with credits created'
+                else:
+                    message='user Credits Update'
+
+                return Response({'message':message,'user_info': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            },'token': token},status=201 )
+            except User.DoesNotExist:
+                return Response({'message':'User not exists'},status=200)
+        
+        else:
+            print('user just logged in')
+            return Response({
             'user_info': {
                 'id': user.id,
                 'username': user.username,
@@ -121,7 +167,6 @@ def get_facebook_user_data(request):
             },
             'token': token
         })
-
         # Perform further processing or save the user data in your Django database
         # ...
 
@@ -203,8 +248,28 @@ class ShopApi(viewsets.ModelViewSet):
             }, status=200)
         else:
             return Response({'error': 'you are not authenticated'}, status=400)
+    # def put(self,request):
+    #     serializer=ShopSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     shop=serializer.save()
+    #     subject = "Shop Created"
+    #     message = "Shop Account created Success"
+    #     email = request.data.get('email')
+    #     recipient = [email]
+    #     from_email = settings.EMAIL_HOST_USER
+    #     try:
+    #             send_mail(subject, message, from_email, recipient)
+    #     except:
+    #         return Response('Failed to create Shop', status=200)
+    #     return Response({
+    #             "shop_info": {
+    #                 "shop_name": shop.name,
+    #                 "shop_profile": shop.profile,
+    #                 "shop_tel": shop.telephone,
+                    
 
-
+    #             }
+    #         }, status=200)
 class ProductCategoryApi(APIView):
 
     def get(self, request, id):
@@ -213,7 +278,11 @@ class ProductCategoryApi(APIView):
             products, many=True, context={'request': request})
         return Response(serializer.data)
 
-
+class UserProducts(APIView):
+    def get(self,request,id):
+        products=Product.objects.filter(seller=id)
+        serializer=ProductSerializer(products,many=True,context={'request':request})
+        return Response(serializer.data)
 class ShopProduct(APIView):
     def get(self, request, id):
         products = Product.objects.filter(shop=id)
@@ -313,22 +382,33 @@ class UserRegister(APIView):
         except Exception as e:
             return Response(str(e), status=500)
 @csrf_exempt
-@api_view(['POST',])
-def CreditView(request):
+@api_view(['POST','GET'])
+def CreditView(request,id):
     credits=request.data.get('credit')
     userReceived=request.data.get('user')
-    try:
-        user=User.objects.get(pk=userReceived)
-        credit,created=FreeCredit.objects.update_or_create(user=user,defaults={'credits':credits})
-        if created:
-            message='User with credits created'
-        else:
-            message='user Credits Update'
+    if request.method =='POST':
+        try:
+            user=User.objects.get(pk=id)
+            credit,created=FreeCredit.objects.update_or_create(user=user,defaults={'credits':credits})
+            if created:
+                message='User with credits created'
+            else:
+                message='user Credits Update'
 
-        return Response({'message',message},status=201 )
-    except User.DoesNotExist:
-       return Response({'message':'User not exists'},status=200)
-    # 
+            return Response({'message',message},status=201 )
+        except User.DoesNotExist:
+            return Response({'message':'User not exists'},status=200)
+        
+    else:
+        try:
+           user=User.objects.get(pk=id)
+           credit=FreeCredit.objects.get(user=user)
+           if credit:
+               return Response({credit.credits},status=200)
+        except:
+            return Response({"user not exists"},status=401)
+            
+        # 
 
     # usercredit=FreeCredit.objects.get(user=user)
     # if(usercredit):
@@ -579,31 +659,35 @@ def VerifyCode(request):
 
 
 class EditShop(APIView):
-    def put(self, request):
-        name = request.data.get('name')
-        location = request.data.get('location')
-        phone = request.data.get('phone_number')
-        profile = request.data.get('profile')
-        cover = request.data.get('cover')
+    def put(self, request,shop_id):
+        
         try:
-            shop = Shop.objects.get(name=name)
-        except:
+            shop = Shop.objects.get(pk=shop_id)
+            
+            try: 
+                shop.location = request.data.get('location', shop.location)
+                shop.telephone = request.data.get('phone_number', shop.telephone)
+                shop.profile = request.data.get('profile', shop.profile)
+                shop.cover = request.data.get('cover', shop.cover)
+                shop.name=request.data.get('name', shop.name)
+                print(shop.cover)
+                shop.save()
+                
+               
+                print(shop)
+                subject = 'Shop Update'
+                message = 'Shop information updated'
+                from_email = settings.EMAIL_HOST_USER
+                recipient_list = [shop.email]
+                send_mail(subject, message, from_email, recipient_list)
+                return Response("success", status=200)
+            except:
+                return Response("failed to send Email",status=404)
+        except ObjectDoesNotExist:
             return Response("shop not found", status=401)
-        shop.location = location
-        shop.telephone = phone
-        shop.profile = profile
-        shop.cover = cover
+        
 
-        try:
-            shop.save()
-            subject = 'Shop Update'
-            message = 'Shop information updated'
-            from_email = settings.EMAIL_HOST_USER
-            recipient_list = [shop.email]
-            send_mail(subject, message, from_email, recipient_list)
-            return Response("success", status=200)
-        except:
-            return Response("failed to Edit", status=401)
+       
 
 
 class SingleShop(APIView):
@@ -623,7 +707,8 @@ class SingleShop(APIView):
                     'shop_profile': shop_info.get('profile'),
                     'shop_location': shop_info.get('location'),
                     'shop_tel': shop_info.get('telephone'),
-                    'shop_cover': shop_info.get('cover')
+                    'shop_cover': shop_info.get('cover'),
+                    'shop_email':shop_info.get('email')
 
                 }
             }, status=status.HTTP_200_OK)

@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,10 +28,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY = 'django-insecure-tq2faq55n=45w^b%ovp%h7s!@me))+!mca$#*&f=pij#dg5%ig'
 SECRET_KEY=os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG","False").lower()=="true"
+# DEBUG = os.environ.get("DEBUG","False").lower()=="True"
+DEBUG=True
 
 ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
-                 '10.0.2.2:8001', 'fe7d-2c0f-eb68-62c-9f00-fc63-4202-ba36-523.ngrok-free.app']
+                 '10.0.2.2:8001', 'b0eb-2c0f-eb68-62c-9f00-b9de-ba13-67d9-164e.ngrok-free.app']
 # ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
 # AUTHENTICATION BACKENDS
 AUTHENTICATION_BACKENDS = [
@@ -84,7 +86,7 @@ INSTALLED_APPS = [
     'ProductApi',
     'Chat',
     'rest_framework',
-    # 'rest_framework_simplejwt',
+    'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'social_django',
     'allauth',
@@ -204,11 +206,14 @@ MEDIA_URL = "/media/"
 #     ),
 # }
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication','rest_framework_simplejwt.authentication.JWTAuthentication'),
     # 'DEFAULT_RENDERER_CLASSES': [
     #     'rest_framework.renderers.JSONRenderer',
     # ]
 
+}
+SIMPLE_JWT={
+    'ACCESS_TOKEN_LIFETIME':timedelta(minutes=600)
 }
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_METHODS = [
@@ -236,5 +241,5 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "ngogainnocent1@gmail.com"
-EMAIL_HOST_PASSWORD = "xnuidowulzwulahy"
+EMAIL_HOST_USER = "kaznikaz@gmail.com"
+EMAIL_HOST_PASSWORD = "fmjxjmjpijqkoguz"
