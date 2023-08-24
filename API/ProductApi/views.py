@@ -69,9 +69,9 @@ def validate_google_token(request):
         # Return the user information
         User = get_user_model()
         user, created = User.objects.get_or_create(email=id_info['email'])
-        user.first_name = id_info['given_name']
-        user.last_name = id_info['family_name']
-        user.username = id_info['given_name']
+        # user.first_name = id_info['given_name']
+        # user.last_name = id_info['family_name']
+        user.username = id_info['given_name'] or id_info['family_name']
         user.set_unusable_password()
         user.save()
         _, token = AuthToken.objects.create(user)

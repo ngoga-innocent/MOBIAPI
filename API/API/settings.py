@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY=os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = os.environ.get("DEBUG","false").lower()=="true"
-DEBUG=False
+DEBUG=True
 
 # ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
 #                  '10.0.2.2:8001', 'b0eb-2c0f-eb68-62c-9f00-b9de-ba13-67d9-164e.ngrok-free.app']
