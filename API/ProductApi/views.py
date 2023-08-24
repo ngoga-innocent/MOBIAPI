@@ -35,7 +35,7 @@ import random
 import string
 from django.utils import timezone
 import json
-import face_recognition
+# import face_recognition
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
@@ -1134,31 +1134,31 @@ def serve_assetlinks_json(request):
     assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'assetlinks.json')
     with open(assetlinks_json_path, 'r') as file:
         return HttpResponse(file.read(), content_type='application/json')
-@csrf_exempt
-@api_view(('POST',))
-def faceVerification(request):
-    if request.method=='POST':
-        try:
-            id_image=request.FILES['Idcard']
-            selfie=request.FILES['image']
+# @csrf_exempt
+# @api_view(('POST',))
+# def faceVerification(request):
+#     if request.method=='POST':
+#         try:
+#             id_image=request.FILES['Idcard']
+#             selfie=request.FILES['image']
 
-            id_Image=face_recognition.load_image_file(id_image)
-            selfie_Image=face_recognition.load_image_file(selfie)
+#             id_Image=face_recognition.load_image_file(id_image)
+#             selfie_Image=face_recognition.load_image_file(selfie)
 
-    #ectract facial features 
-            document_face_encoding = face_recognition.face_encodings(id_Image)[0]
-            selfie_face_encoding = face_recognition.face_encodings(selfie_Image)[0]
+#     #ectract facial features 
+#             document_face_encoding = face_recognition.face_encodings(id_Image)[0]
+#             selfie_face_encoding = face_recognition.face_encodings(selfie_Image)[0]
 
-     # Compare the facial features
-            similarity = face_recognition.face_distance([document_face_encoding], selfie_face_encoding)[0]
-    # Define a verification threshold (e.g., 0.6)
-            verification_threshold = 0.6
-            if similarity < verification_threshold:
+#      # Compare the facial features
+#             similarity = face_recognition.face_distance([document_face_encoding], selfie_face_encoding)[0]
+#     # Define a verification threshold (e.g., 0.6)
+#             verification_threshold = 0.6
+#             if similarity < verification_threshold:
                 
-                return JsonResponse({'message': 'KYC verified'},status=200)
-            else:
-                return JsonResponse({'message': 'Face verification failed'},status=405)
-        except MultiValueDictKeyError as e:
-            return JsonResponse({'error':'error field not found'})
-    else:
-        return JsonResponse({'error':'invalid request method '},status=405)
+#                 return JsonResponse({'message': 'KYC verified'},status=200)
+#             else:
+#                 return JsonResponse({'message': 'Face verification failed'},status=405)
+#         except MultiValueDictKeyError as e:
+#             return JsonResponse({'error':'error field not found'})
+#     else:
+#         return JsonResponse({'error':'invalid request method '},status=405)

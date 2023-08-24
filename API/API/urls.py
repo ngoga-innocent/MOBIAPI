@@ -78,7 +78,7 @@ urlpatterns = [
     path('api/docs/kaznikaz/version1/shopverify', views.VerifyCode),
     path('api/docs/kaznikaz/version1/shoppass', views.ResetShopPassword.as_view()),
     path('api/docs/kaznikaz/version1/editShop/<int:shop_id>', views.EditShop.as_view()),
-    path('api/docs/kaznikaz/version1/verification',views.faceVerification),
+    # path('api/docs/kaznikaz/version1/verification',views.faceVerification),
     path('api/docs/kaznikaz/version1/paymentStatus',views.CheckStatus),
     path('api/docs/kaznikaz/version1/freeCredits/<int:id>',views.CreditView),
     path('api/docs/kaznikaz/version1/.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
