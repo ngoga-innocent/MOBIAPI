@@ -82,7 +82,7 @@ urlpatterns = [
     # path('api/docs/kaznikaz/version1/verification',views.faceVerification),
     path('api/docs/kaznikaz/version1/paymentStatus',views.CheckStatus),
     path('api/docs/kaznikaz/version1/freeCredits/<int:id>',views.CreditView),
-    path('api/docs/kaznikaz/version1/.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
+    path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
     
 
 

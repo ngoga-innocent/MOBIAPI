@@ -999,7 +999,7 @@ def Pays(request):
             'amount': amount,
             'currency': 'RWF',
             'description': 'payment',
-            'callbackUrl': 'https://0c84-102-22-173-142.ngrok-free.app/callback'
+            'callbackUrl': 'https://www.kaznikaz.com/api/docs/kaznikaz/version1/callback'
             # 'callbackUrl':os.environ.get("CALLBACK_URL")
         }
         
