@@ -3,13 +3,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product, Categories, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
 from django.contrib.auth.models import User
-from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer
+from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer,UserLoginSerializer
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework import viewsets
+from rest_framework import viewsets,permissions,generics
 from rest_framework import filters
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from knox.auth import AuthToken
+from knox.models import AuthToken
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
 import secrets
@@ -36,7 +36,7 @@ import string
 from django.utils import timezone
 import json
 # import face_recognition
-from django.db import transaction
+# from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 User = get_user_model()
@@ -173,7 +173,7 @@ def get_facebook_user_data(request):
     else:
         return JsonResponse({'error': 'Failed to retrieve user data from Facebook'}, status=400)
 
-
+#Product functions
 class ProductApi(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -181,13 +181,13 @@ class ProductApi(viewsets.ModelViewSet):
     search_fields = ['title', 'shop__name',
                      'seller__username', 'category__name']
 
-
+#adding Color
 class ColorApi(viewsets.ModelViewSet):
     queryset = Color.objects.all()
     serializer_class = ColorSerializer
     filter_backends = [filters.SearchFilter]
 
-
+#Categories API
 class CategoriesApi(viewsets.ModelViewSet):
     queryset = Categories.objects.filter(parent__isnull=True)
     serializer_class = CategoriesSerializer
@@ -198,7 +198,7 @@ class CategoriesApi(viewsets.ModelViewSet):
 # class GoogleLogin(SocialLoginView):
 #     adapter_class = GoogleOAuth2Adapter
 
-
+#product with discount
 class Discount(APIView):
     def get(self, request):
         queryset = Product.objects.filter(discount__gt=0)
@@ -215,7 +215,7 @@ class Discount(APIView):
                 'msg': 'No Discounted product'
             })
 
-
+#adding Shop
 class ShopApi(viewsets.ModelViewSet):
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer
@@ -357,7 +357,7 @@ class UserRegister(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         code = generate_verification_code()
-        subject = "Mobishop Account Created"
+        subject = "Kaz ni Kaz  Account Created"
         message = f"Your account has been created with the username: {request.POST['username']},password:  {request.POST['password']},code: {code}"
         recipient_list = [request.data['email']]
         from_email = settings.EMAIL_HOST_USER
@@ -528,6 +528,7 @@ def NewPassword(request):
 class AuthUser(APIView):
     def get(self, request):
         user = request.user
+        
 
         if user.is_authenticated:
             return Response({
@@ -540,8 +541,13 @@ class AuthUser(APIView):
                 }
             })
         else:
-            return Response({'error': 'you are not logged in'}, status=400)
+            return Response({'error': 'you are not logged in'}, status=401)
+class UserAPI(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = UserLoginSerializer
 
+    def get_object(self):
+        return self.request.user
 
 class Profile(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()

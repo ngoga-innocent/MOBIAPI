@@ -41,6 +41,7 @@ urlpatterns = [
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/docs/kaznikaz/version1/login', views.Login.as_view()),
     path('api/docs/kaznikaz/version1/user', views.AuthUser.as_view()),
+    path('api/docs//kaznikaz/version1/userpr',views.UserAPI.as_view()),
     path('api/docs/kaznikaz/version1/signup', views.UserRegister.as_view()),
     path('api/docs/kaznikaz/version1/logout', knox_views.LogoutView.as_view()),
     path('api/docs/kaznikaz/version1/logoutall', knox_views.LogoutAllView.as_view()),
