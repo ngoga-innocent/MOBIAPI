@@ -83,6 +83,7 @@ urlpatterns = [
     path('api/docs/kaznikaz/version1/paymentStatus',views.CheckStatus),
     path('api/docs/kaznikaz/version1/freeCredits/<int:id>',views.CreditView),
     path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
+    path('apple-app-site-association',views.app_serve_assetlinks_json,name='apple-app-site-association'),
     
 
 

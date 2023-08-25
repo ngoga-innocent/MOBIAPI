@@ -1140,6 +1140,10 @@ def serve_assetlinks_json(request):
     assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'assetlinks.json')
     with open(assetlinks_json_path, 'r') as file:
         return HttpResponse(file.read(), content_type='application/json')
+def app_serve_assetlinks_json(request):
+    assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'apple-app-site-association')
+    with open(assetlinks_json_path, 'r') as file:
+        return HttpResponse(file.read(), content_type='application/json')
 # @csrf_exempt
 # @api_view(('POST',))
 # def faceVerification(request):

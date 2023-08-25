@@ -1,0 +1,11 @@
+{
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appID": "Boss Ama.com.themobileShop.app",
+                "paths": ["*"]
+            }
+        ]
+    }
+}
