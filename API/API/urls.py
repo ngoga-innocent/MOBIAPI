@@ -24,6 +24,7 @@ router.register('comment', views.CommentView)
 router.register('rating', views.RatingView)
 router.register('ouradds', views.OurAddsView)
 router.register('like', views.LikeView)
+router.register('news',views.NewsViews)
 # router.register('freecredit',views.FreeCredit)
 # router.register('followers', views.FollowerView)
 
@@ -82,8 +83,12 @@ urlpatterns = [
     # path('api/docs/kaznikaz/version1/verification',views.faceVerification),
     path('api/docs/kaznikaz/version1/paymentStatus',views.CheckStatus),
     path('api/docs/kaznikaz/version1/freeCredits/<int:id>',views.CreditView),
+    path('api/docs/kaznikaz/version1/normalProducts',views.NormalProduct.as_view()),
+    path('api/docs/kaznikaz/version1/vipproducts',views.VipProduct.as_view()),
     path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
     path('apple-app-site-association',views.app_serve_assetlinks_json,name='apple-app-site-association'),
+    
+    # path('api/docs/kaznikaz/version1/news',views.NewsViews.as_view()),
     
 
 

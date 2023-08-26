@@ -66,6 +66,9 @@ class VerificationCode(models.Model):
     created = models.DateTimeField(default=timezone.now)
     username = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.username
+
 
 class ShopVerificationCode(models.Model):
     code = models.CharField(max_length=15)
@@ -116,6 +119,8 @@ class Product(models.Model):
     phone = models.CharField(max_length=20, null=True)
     IdCard = models.ImageField(upload_to='Id', null=True)
     image = models.ImageField(upload_to='Id', null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    place=models.CharField(max_length=255,default='Normal')
 
     def __str__(self):
         return self.title
@@ -137,7 +142,9 @@ class UserProfile(models.Model):
     profile = models.ImageField(upload_to='Profile')
     coverPhoto = models.ImageField(upload_to='Profile')
     library = models.ImageField(null=True, upload_to='Profile', blank=True)
-
+    
+    def __str__(self):
+        return self.user
 
 class ProfileImages(models.Model):
     profile = models.ForeignKey(
@@ -191,6 +198,7 @@ class Notification(models.Model):
     type = models.CharField(choices=TYPE_CHOICE,
                             default='app notification', max_length=255)
     message = models.TextField()
+    
 
 
 class OurAdds(models.Model):
@@ -205,6 +213,25 @@ class Payment(models.Model):
     trackId=models.CharField(max_length=255)
     description=models.TextField()
 
+    def __str__(self):
+        return self.transId
+
 class FreeCredit(models.Model):
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     credits=models.IntegerField()
+    def __str__(self):
+        return self.user
+
+class News(models.Model):
+    title=models.CharField(max_length=255)
+    subtitle=models.CharField(max_length=255,null=True)
+    url=models.URLField()
+    thumbnail=models.ImageField(upload_to='News',default='no Image')
+
+    def __str__(self):
+        return self.title
+    
+class Jobs(models.Model):
+    title=models.CharField(max_length=255)
+    description=models.TextField()
+    contact=models.CharField(max_length=255)

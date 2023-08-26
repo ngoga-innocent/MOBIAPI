@@ -1,9 +1,9 @@
 from django.http import JsonResponse,HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product, Categories, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
+from .models import News,Product, Categories, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
 from django.contrib.auth.models import User
-from .serializer import ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer,UserLoginSerializer
+from .serializer import NewsSerializer,ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer,UserLoginSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import viewsets,permissions,generics
@@ -286,6 +286,27 @@ class UserProducts(APIView):
 class ShopProduct(APIView):
     def get(self, request, id):
         products = Product.objects.filter(shop=id)
+        serializer = ProductSerializer(
+            products, many=True, context={'request': request})
+
+        return Response(serializer.data)
+# class ShopProduct(APIView):
+#     def get(self, request, id):
+#         products = Product.objects.filter(shop=id)
+#         serializer = ProductSerializer(
+#             products, many=True, context={'request': request})
+
+        # return Response(serializer.data)
+class NormalProduct(APIView):
+    def get(self, request):
+        products = Product.objects.filter(place='Normal')
+        serializer = ProductSerializer(
+            products, many=True, context={'request': request})
+
+        return Response(serializer.data)
+class VipProduct(APIView):
+    def get(self, request):
+        products = Product.objects.filter(place='Vip')
         serializer = ProductSerializer(
             products, many=True, context={'request': request})
 
@@ -1144,6 +1165,11 @@ def app_serve_assetlinks_json(request):
     assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'apple-app-site-association')
     with open(assetlinks_json_path, 'r') as file:
         return HttpResponse(file.read(), content_type='application/json')
+class NewsViews(viewsets.ModelViewSet):
+    queryset = News.objects.all()
+    serializer_class = NewsSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title']
 # @csrf_exempt
 # @api_view(('POST',))
 # def faceVerification(request):
