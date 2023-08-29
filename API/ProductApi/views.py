@@ -58,6 +58,7 @@ def validate_google_token(request):
         # Specify the Google OAuth 2.0 client ID for your application
         CLIENT_ID = os.environ.get("GOOGLE_ID")
         token = request.data.get('token')
+        device_token=request.data.get('device_token')
         # Verify and decode the token
         id_info = id_token.verify_token(
             token, google_requests.Request(), CLIENT_ID)
@@ -72,6 +73,7 @@ def validate_google_token(request):
         # user.first_name = id_info['given_name']
         # user.last_name = id_info['family_name']
         user.username = id_info['given_name'] or id_info['family_name']
+        user.device_token=device_token
         user.set_unusable_password()
         user.save()
         _, token = AuthToken.objects.create(user)
@@ -89,7 +91,8 @@ def validate_google_token(request):
                 return Response({'message':message,'user_info': {
                 'id': user.id,
                 'username': user.username,
-                'email': user.email
+                'email': user.email,
+                'device_token':user.device_token
             },'token': token},status=201 )
             except User.DoesNotExist:
                 return Response({'message':'User not exists'},status=200)
@@ -100,7 +103,8 @@ def validate_google_token(request):
             'user_info': {
                 'id': user.id,
                 'username': user.username,
-                'email': user.email
+                'email': user.email,
+                'device_token':user.device_token
             },
             'token': token
         })
@@ -117,6 +121,7 @@ def Home(request):
 def get_facebook_user_data(request):
     # Or request.GET.get('access_token') if using query string
     access_token = request.data.get('access_token')
+    device_token=request.data.get('device_token')
     client_id = os.environ.get("FB_ID")
     # Make a request to the Facebook Graph API
     url = f'https://graph.facebook.com/me?access_token={access_token}&fields=id,name,email&client_id={client_id}'
@@ -135,6 +140,7 @@ def get_facebook_user_data(request):
 
         user.username = user_name
         user.email = user_email
+        user.device_token=device_token
         user.set_unusable_password()
         user.save()
         _, token = AuthToken.objects.create(user)
@@ -152,7 +158,8 @@ def get_facebook_user_data(request):
                 return Response({'message':message,'user_info': {
                 'id': user.id,
                 'username': user.username,
-                'email': user.email
+                'email': user.email,
+                'device_token':user.device_token
             },'token': token},status=201 )
             except User.DoesNotExist:
                 return Response({'message':'User not exists'},status=200)
@@ -163,7 +170,8 @@ def get_facebook_user_data(request):
             'user_info': {
                 'id': user.id,
                 'username': user.username,
-                'email': user.email
+                'email': user.email,
+                'device_token':user.device_token
             },
             'token': token
         })
@@ -394,6 +402,7 @@ class UserRegister(APIView):
                         'username': user.username,
                         'email': user.email,
                         'phone_number': user.phone_number,
+                        'device_token':user.device_token
                     },
                     'token': token
                 })
@@ -487,7 +496,8 @@ class Login(APIView):
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'phone_number': user.phone_number
+                'phone_number': user.phone_number,
+                'device_token':user.device_token
             },
             'token': token
         })
@@ -558,7 +568,8 @@ class AuthUser(APIView):
                     'username': user.username,
                     'email': user.email,
                     'firstname': user.first_name,
-                    'secondName': user.last_name
+                    'secondName': user.last_name,
+                    'device_token':user.device_token
                 }
             })
         else:

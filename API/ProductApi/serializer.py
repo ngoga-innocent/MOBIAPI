@@ -111,7 +111,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password',
-                  'first_name', 'last_name', 'phone_number']
+                  'first_name', 'last_name', 'phone_number','device_token']
 
         extra_kwargs = {
             "password": {"write_only": True},
@@ -134,9 +134,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         last_name = validated_data.get('last_name')
         password = validated_data.get('password')
         phone_number = validated_data.get('phone_number')
+        device_token=validated_data.get('device_token')
 
         user = User(username=username, email=email,
-                    first_name=first_name, last_name=last_name, phone_number=phone_number)
+                    first_name=first_name, last_name=last_name, phone_number=phone_number,device_token=device_token)
 
         user.set_password(password)
         user.save()
