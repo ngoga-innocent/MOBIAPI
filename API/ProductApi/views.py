@@ -39,6 +39,8 @@ import json
 # from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
+# from ..API.FcmpushNotification import send_to_individual,send_push_to_all
+from API.FcmpushNotification import send_push_to_all,send_to_individual
 User = get_user_model()
 
 # from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -1181,6 +1183,12 @@ class NewsViews(viewsets.ModelViewSet):
     serializer_class = NewsSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['title']
+
+
+@api_view(['GET'])
+def TestPush(request):
+    send_to_individual('e3S_oAtgR8iRrcKzc0BI5g:APA91bEKnGMVna0qp5KtDYVMtupjSHNFIT8EtDZVIxFdC_eAjeVrzOWZBuUy4uvVbByICAcjeKkmF0aIVWXxd8iPtX06dH5NwY4rNBML79xbC7cG8vC8uUTqVzh17V_p3fUDm2fgAzEP','Backed Message','test notifications')
+    return Response({'message':'send to device'})
 # @csrf_exempt
 # @api_view(('POST',))
 # def faceVerification(request):
