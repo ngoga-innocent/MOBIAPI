@@ -31,9 +31,9 @@ SECRET_KEY=os.environ.get("SECRET_KEY")
 # DEBUG = os.environ.get("DEBUG","false").lower()=="true"
 DEBUG=True
 
-ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
-                 '10.0.2.2:8001', 'b0eb-2c0f-eb68-62c-9f00-b9de-ba13-67d9-164e.ngrok-free.app']
-# ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
+# ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
+#                  '10.0.2.2:8001', 'b0eb-2c0f-eb68-62c-9f00-b9de-ba13-67d9-164e.ngrok-free.app']
+ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
 # AUTHENTICATION BACKENDS
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
