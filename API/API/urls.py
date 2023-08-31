@@ -87,7 +87,9 @@ urlpatterns = [
     path('api/docs/kaznikaz/version1/vipproducts',views.VipProduct.as_view()),
     path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
     path('apple-app-site-association',views.app_serve_assetlinks_json,name='apple-app-site-association'),
-    path('testpush',views.TestPush),
+    path('api/docs/kaznikaz/version1/testpush',views.TestPush),
+    path('api/docs/kaznikaz/version1/sendall',views.SendToAll),
+    path('api/docs/kaznikaz/version1/registerToken',views.RegisterToken)
     
     # path('api/docs/kaznikaz/version1/news',views.NewsViews.as_view()),
     

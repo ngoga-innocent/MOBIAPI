@@ -4,6 +4,7 @@ from firebase_admin import messaging
 from django.contrib.auth import get_user_model
 import os
 from django.conf import settings
+from ProductApi.models import DeviceTokens
 User=get_user_model()
 credential_path = os.path.join(settings.BASE_DIR, 'API', 'ServiceAccountKey.json')
 logopath=os.path.join(settings.BASE_DIR, 'API', 'logo.png')
@@ -41,3 +42,11 @@ def send_push_notification(token, title, body):
 
     response = messaging.send(message)
     print("Successfully sent message:", response)
+def send_to_all_tokens(title,body):
+    tokens=DeviceTokens.objects.all()
+
+    for token in tokens:
+        toke=token.deviceToken
+        send_push_notification(toke,title,body)
+
+        

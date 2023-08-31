@@ -1,7 +1,7 @@
 from django.http import JsonResponse,HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import News,Product, Categories, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
+from .models import News,Product, Categories,DeviceTokens, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
 from django.contrib.auth.models import User
 from .serializer import NewsSerializer,ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer,UserLoginSerializer
 from rest_framework import status
@@ -40,7 +40,7 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 # from ..API.FcmpushNotification import send_to_individual,send_push_to_all
-from API.FcmpushNotification import send_push_to_all,send_to_individual
+from API.FcmpushNotification import send_push_to_all,send_to_individual,send_to_all_tokens
 User = get_user_model()
 
 # from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -1189,6 +1189,21 @@ class NewsViews(viewsets.ModelViewSet):
 def TestPush(request):
     send_to_individual('e3S_oAtgR8iRrcKzc0BI5g:APA91bEKnGMVna0qp5KtDYVMtupjSHNFIT8EtDZVIxFdC_eAjeVrzOWZBuUy4uvVbByICAcjeKkmF0aIVWXxd8iPtX06dH5NwY4rNBML79xbC7cG8vC8uUTqVzh17V_p3fUDm2fgAzEP','Backed Message','test notifications')
     return Response({'message':'send to device'})
+
+@api_view(['POST'])
+def RegisterToken(request):
+    if request.method == 'POST':
+        token = request.POST.get('token')
+        
+        if not DeviceTokens.objects.filter(token=token).exists():
+            DeviceTokens.objects.create(token=token)
+        
+        return JsonResponse({'message': 'Device token registered successfully.'})
+    return JsonResponse({'message': 'Invalid request.'})
+    
+@api_view(['GET'])
+def SendToAll(request):
+    send_to_all_tokens('All devices','Kaz ni Kaz Updates')
 # @csrf_exempt
 # @api_view(('POST',))
 # def faceVerification(request):
