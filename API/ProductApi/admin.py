@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Categories, Product,News, Shop, Color, FreeCredit,ProductImages, Test, UserProfile, ProfileImages, ShopVerificationCode, VerificationCode, UserLike, UserFollow, CustomUser,ShopFollowers,Like,Payment
+from .models import Categories,DeviceTokens, Product,News, Shop, Color, FreeCredit,ProductImages, Test, UserProfile, ProfileImages, ShopVerificationCode, VerificationCode, UserLike, UserFollow, CustomUser,ShopFollowers,Like,Payment
 # Register your models here.
 from django.contrib.auth import get_user_model
 from .models import CustomUserManager
@@ -30,5 +30,6 @@ admin.site.register(Like)
 admin.site.register(Payment)
 admin.site.register(FreeCredit)
 admin.site.register(News)
+admin.site.register(DeviceTokens)
 # admin.site.register(CustomUser,CustomUserAdmin)
 

@@ -239,3 +239,5 @@ class Jobs(models.Model):
 
 class DeviceTokens(models.Model):
     deviceToken=models.TextField()
+    def __str__(self):
+        return self.id

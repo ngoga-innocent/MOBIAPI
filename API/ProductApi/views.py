@@ -1193,10 +1193,10 @@ def TestPush(request):
 @api_view(['POST'])
 def RegisterToken(request):
     if request.method == 'POST':
-        token = request.POST.get('token')
-        
-        if not DeviceTokens.objects.filter(token=token).exists():
-            DeviceTokens.objects.create(token=token)
+        token = request.data.get('token')
+        print(token)
+        if not DeviceTokens.objects.filter(deviceToken=token).exists():
+            DeviceTokens.objects.create(deviceToken=token)
         
         return JsonResponse({'message': 'Device token registered successfully.'})
     return JsonResponse({'message': 'Invalid request.'})
@@ -1204,6 +1204,7 @@ def RegisterToken(request):
 @api_view(['GET'])
 def SendToAll(request):
     send_to_all_tokens('All devices','Kaz ni Kaz Updates')
+    return JsonResponse({'message': 'sent to devices '})
 # @csrf_exempt
 # @api_view(('POST',))
 # def faceVerification(request):
