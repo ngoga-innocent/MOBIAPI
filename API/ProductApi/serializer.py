@@ -1,5 +1,5 @@
 from rest_framework import serializers, validators
-from .models import Product, Shop, Categories, OurAdds,News, ProductImages, Color, FreeCredit,Test, Notification, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, ShopFollowers, UserLike
+from .models import Product, Shop,Jobs, Categories, OurAdds,News, ProductImages, Color, FreeCredit,Test, Notification, ProfileImages, UserProfile, Comment, Like, Rating, UserFollow, ShopFollowers, UserLike
 import base64
 # from django.contrib.auth.models import get_user_model
 from django.contrib.auth.hashers import make_password
@@ -229,6 +229,10 @@ class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = '__all__'
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Jobs
+        fields='__all__'
 # class CreditSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = FreeCredit

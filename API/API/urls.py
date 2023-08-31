@@ -25,6 +25,7 @@ router.register('rating', views.RatingView)
 router.register('ouradds', views.OurAddsView)
 router.register('like', views.LikeView)
 router.register('news',views.NewsViews)
+router.register('jobs',views.JobsViews)
 # router.register('freecredit',views.FreeCredit)
 # router.register('followers', views.FollowerView)
 

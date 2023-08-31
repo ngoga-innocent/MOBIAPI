@@ -236,6 +236,7 @@ class Jobs(models.Model):
     title=models.CharField(max_length=255)
     description=models.TextField()
     contact=models.CharField(max_length=255)
+    approved=models.BooleanField(default=False)
 
 class DeviceTokens(models.Model):
     deviceToken=models.TextField()

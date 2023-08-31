@@ -1,9 +1,9 @@
 from django.http import JsonResponse,HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import News,Product, Categories,DeviceTokens, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
+from .models import News,Product,Jobs, Categories,DeviceTokens, ShopVerificationCode,Payment, FreeCredit,VerificationCode, Shop, Color, Test, UserProfile, OurAdds, Comment, Notification, Rating, Like, UserFollow, UserLike, ShopFollowers
 from django.contrib.auth.models import User
-from .serializer import NewsSerializer,ProductSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer,UserLoginSerializer
+from .serializer import NewsSerializer,ProductSerializer,JobSerializer, ShopFollowersSerializer, NotificationSerializer, OurAddsSerializer, CategoriesSerializer, FollowersSerializer, ShopSerializer, ColorSerializer, TestSerializer, UserRegistrationSerializer, UserProfileSerializer, CommentSerializer, RatingSerializer, LikeSerializer, UserLikeSerializer,UserLoginSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import viewsets,permissions,generics
@@ -1181,8 +1181,8 @@ def app_serve_assetlinks_json(request):
 class NewsViews(viewsets.ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['title']
+    # filter_backends = [filters.SearchFilter]
+    # search_fields = ['title']
 
 
 @api_view(['GET'])
@@ -1204,7 +1204,11 @@ def RegisterToken(request):
 @api_view(['GET'])
 def SendToAll(request):
     send_to_all_tokens('All devices','Kaz ni Kaz Updates')
-    return JsonResponse({'message': 'sent to devices '})
+    return JsonResponse({'message': 'sent to devices'})
+class JobsViews(viewsets.ModelViewSet):
+    queryset = Jobs.objects.all()
+    serializer_class = JobSerializer
+    
 # @csrf_exempt
 # @api_view(('POST',))
 # def faceVerification(request):
