@@ -237,6 +237,7 @@ class Jobs(models.Model):
     description=models.TextField()
     contact=models.CharField(max_length=255)
     approved=models.BooleanField(default=False)
+    owner=models.ForeignKey(CustomUser,on_delete=models.CASCADE,default=1)
 
 class DeviceTokens(models.Model):
     deviceToken=models.TextField()

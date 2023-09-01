@@ -1208,6 +1208,10 @@ def SendToAll(request):
 class JobsViews(viewsets.ModelViewSet):
     queryset = Jobs.objects.all()
     serializer_class = JobSerializer
+    def list(self, request):
+        queryset = Jobs.objects.filter(approved=True)
+        serializer = JobSerializer(queryset, many=True)
+        return Response(serializer.data)
     
 # @csrf_exempt
 # @api_view(('POST',))
