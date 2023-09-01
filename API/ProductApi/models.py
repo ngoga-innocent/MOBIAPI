@@ -200,6 +200,8 @@ class Notification(models.Model):
                             default='app notification', max_length=255)
     message = models.TextField()
     
+    def __str__(self):
+        return self.name
 
 
 class OurAdds(models.Model):

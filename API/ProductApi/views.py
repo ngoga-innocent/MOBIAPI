@@ -907,7 +907,7 @@ class NotificationView(APIView):
             )
             notification.save()
             notifications.append(notification)
-            send_to_individual(user.deviceToke,'Kaz ni kaz',request.data.get('message'))
+            # send_to_individual(user.deviceToke,'Kaz ni kaz',request.data.get('message'))
         serializer = NotificationSerializer(notification)
         return Response({'msg': 'notification Sent'})
 
@@ -936,8 +936,8 @@ class NotificationView(APIView):
 class AppNotification(APIView):
     def get(self, request):
         app_notification = Notification.objects.filter(
-            type='app notification', is_read=False)
-        serializer = NotificationSerializer(app_notification, many=True)
+            type='app notification',is_read=False)
+        serializer = NotificationSerializer(app_notification, many=True,context={'request', request})
 
         return Response(serializer.data)
 
@@ -945,7 +945,7 @@ class AppNotification(APIView):
 class OtherNotification(APIView):
     def get(self, request,uid):
         notifications = Notification.objects.filter(
-            type='other notification', is_read=False,id=uid)
+            type='other notification', is_read=False,recipient=uid)
         serializer = NotificationSerializer(notifications, many=True)
 
         return Response(serializer.data)
