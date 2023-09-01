@@ -4,30 +4,32 @@ from firebase_admin import messaging
 from django.contrib.auth import get_user_model
 import os
 from django.conf import settings
-from ProductApi.models import DeviceTokens
+from ProductApi.models import DeviceTokens,Notification
+from rest_framework.response import Response
 User=get_user_model()
 credential_path = os.path.join(settings.BASE_DIR, 'API', 'ServiceAccountKey.json')
 logopath=os.path.join(settings.BASE_DIR, 'API', 'logo.png')
 cred = credentials.Certificate(credential_path)
 firebase_admin.initialize_app(cred)
 
-def get_all_device_tokens():
-    users=User.objects.all()
-    all_device_tokens=[]
+# def get_all_device_tokens():
+#     users=User.objects.all()
+#     all_device_tokens=[]
 
-    for user in users:
-        token=user.device_token
-        all_device_tokens.append(token)
+#     for user in users:
+#         token=user.device_token
 
-    return all_device_tokens
-def send_push_to_all(title,body):
-     all_devices_tokens=get_all_device_tokens()
+#         all_device_tokens.append(token)
 
-     for token in all_devices_tokens:
-         send_push_notification(token,title,body)
+#     return all_device_tokens
+# def send_push_to_all(title,body):
+#      all_devices_tokens=get_all_device_tokens()
 
-def send_to_individual(token,title,body):
-    send_push_notification(token,title,body)
+#      for token in all_devices_tokens:
+#          send_push_notification(token,title,body)
+
+# def send_to_individual(token,title,body):
+#     send_push_notification(token,title,body)
 
 
 def send_push_notification(token, title, body):
@@ -49,4 +51,17 @@ def send_to_all_tokens(title,body):
         toke=token.deviceToken
         send_push_notification(toke,title,body)
 
-        
+def create_and_send_notification_one(title,body,owner,type):
+    not_owner=User.objects.get(id=owner)
+    if not_owner:
+        save_not= Notification.objects.create(name=title,recipient=not_owner,type=type,message=body)
+        if save_not:
+           return send_push_notification(not_owner.device_token,title,body)
+        else:
+           return Response({'message':'not sent notification'})
+def create_and_send_notification_all(title,body,type):
+    users=User.objects.all()
+    for user in users:
+        save_notifications=Notification.objects.create(name=title,recipient=user,type=type,message=body)
+        if save_notifications:
+            send_push_notification(user.device_token,title,body)

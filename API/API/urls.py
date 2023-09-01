@@ -63,7 +63,7 @@ urlpatterns = [
     path('api/docs/kaznikaz/version1/notification/<str:uid>/<str:notification_id>/read',
          views.NotificationView.as_view()),
     path('api/docs/kaznikaz/version1/app_notifications', views.AppNotification.as_view()),
-    path('api/docs/kaznikaz/version1/other_notifications', views.OtherNotification.as_view()),
+    path('api/docs/kaznikaz/version1/other_notifications/<int:uid>', views.OtherNotification.as_view()),
     path('api/docs/kaznikaz/version1/myshops/<int:uid>', views.UserShops.as_view()),
     # path('callback', views.CallBack.as_view()),
     # path('authpay', views.AuthPayment),
@@ -88,8 +88,8 @@ urlpatterns = [
     path('api/docs/kaznikaz/version1/vipproducts',views.VipProduct.as_view()),
     path('.well-known/assetlinks.json', views.serve_assetlinks_json, name='assetlinks-json'),
     path('apple-app-site-association',views.app_serve_assetlinks_json,name='apple-app-site-association'),
-    path('api/docs/kaznikaz/version1/testpush',views.TestPush),
-    path('api/docs/kaznikaz/version1/sendall',views.SendToAll),
+    # path('api/docs/kaznikaz/version1/testpush',views.TestPush),
+    path('api/docs/kaznikaz/version1/testnot',views.testNot),
     path('api/docs/kaznikaz/version1/registerToken',views.RegisterToken)
     
     # path('api/docs/kaznikaz/version1/news',views.NewsViews.as_view()),

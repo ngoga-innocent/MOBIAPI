@@ -40,7 +40,7 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 # from ..API.FcmpushNotification import send_to_individual,send_push_to_all
-from API.FcmpushNotification import send_push_to_all,send_to_individual,send_to_all_tokens
+from API.FcmpushNotification import send_to_all_tokens,create_and_send_notification_all,create_and_send_notification_one
 User = get_user_model()
 
 # from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -896,7 +896,7 @@ class NotificationView(APIView):
     def post(self, request):
         users = User.objects.all()
         notifications = []
-        print(request.data)
+        # print(request.data)
         for user in users:
             notification = Notification(
                 recipient=user,
@@ -907,6 +907,7 @@ class NotificationView(APIView):
             )
             notification.save()
             notifications.append(notification)
+            send_to_individual(user.deviceToke,'Kaz ni kaz',request.data.get('message'))
         serializer = NotificationSerializer(notification)
         return Response({'msg': 'notification Sent'})
 
@@ -931,6 +932,7 @@ class NotificationView(APIView):
         return Response(serializer.data)
 
 
+
 class AppNotification(APIView):
     def get(self, request):
         app_notification = Notification.objects.filter(
@@ -941,9 +943,9 @@ class AppNotification(APIView):
 
 
 class OtherNotification(APIView):
-    def get(self, request):
+    def get(self, request,uid):
         notifications = Notification.objects.filter(
-            type='other notification', is_read=False)
+            type='other notification', is_read=False,id=uid)
         serializer = NotificationSerializer(notifications, many=True)
 
         return Response(serializer.data)
@@ -1185,10 +1187,10 @@ class NewsViews(viewsets.ModelViewSet):
     # search_fields = ['title']
 
 
-@api_view(['GET'])
-def TestPush(request):
-    send_to_individual('e3S_oAtgR8iRrcKzc0BI5g:APA91bEKnGMVna0qp5KtDYVMtupjSHNFIT8EtDZVIxFdC_eAjeVrzOWZBuUy4uvVbByICAcjeKkmF0aIVWXxd8iPtX06dH5NwY4rNBML79xbC7cG8vC8uUTqVzh17V_p3fUDm2fgAzEP','Backed Message','test notifications')
-    return Response({'message':'send to device'})
+# @api_view(['GET'])
+# def TestPush(request):
+#     send_to_individual('e3S_oAtgR8iRrcKzc0BI5g:APA91bEKnGMVna0qp5KtDYVMtupjSHNFIT8EtDZVIxFdC_eAjeVrzOWZBuUy4uvVbByICAcjeKkmF0aIVWXxd8iPtX06dH5NwY4rNBML79xbC7cG8vC8uUTqVzh17V_p3fUDm2fgAzEP','Backed Message','test notifications')
+#     return Response({'message':'send to device'})
 
 @api_view(['POST'])
 def RegisterToken(request):
@@ -1201,10 +1203,19 @@ def RegisterToken(request):
         return JsonResponse({'message': 'Device token registered successfully.'})
     return JsonResponse({'message': 'Invalid request.'})
     
-@api_view(['GET'])
-def SendToAll(request):
-    send_to_all_tokens('All devices','Kaz ni Kaz Updates')
-    return JsonResponse({'message': 'sent to devices'})
+# @api_view(['GET'])
+# def SendToAll(request):
+#     send_to_all_tokens('All devices','Kaz ni Kaz Updates')
+#     return JsonResponse({'message': 'sent to devices'})
+@api_view(['POST'])
+def testNot(request):
+    title=request.data.get('title')
+    body=request.data.get('body')
+    owner=request.data.get('id')
+    type=request.data.get('type')
+
+    create_and_send_notification_one(title,body,owner,type)
+    return Response({'message':'may be sent or not'})
 class JobsViews(viewsets.ModelViewSet):
     queryset = Jobs.objects.all()
     serializer_class = JobSerializer
