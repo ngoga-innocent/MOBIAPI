@@ -891,12 +891,12 @@ class ChildCategory(APIView):
                 'msg': 'done'
             }, status=404)
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly, ReadOnlyOrAdminPermission]
 class OurAddsView(viewsets.ModelViewSet):
     queryset = OurAdds.objects.all()
     serializer_class = OurAddsSerializer
 
-permission_classes = [permissions.IsAuthenticatedOrReadOnly, ReadOnlyOrAdminPermission]
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class NotificationView(APIView):
     def post(self, request):
         users = User.objects.all()
