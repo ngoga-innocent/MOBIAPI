@@ -207,7 +207,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',  # Allow unauthenticated clients to read
     ),
     'DEFAULT_RENDERER_CLASSES': [
-#     #     'rest_framework.renderers.JSONRenderer',
+    'rest_framework.renderers.JSONRenderer',
          'rest_framework.renderers.BrowsableAPIRenderer',
     ]
 }
