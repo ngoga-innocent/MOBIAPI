@@ -34,6 +34,7 @@ router.register('jobs',views.JobsViews)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.Home),
+    path('api-auth/', include('rest_framework.urls')),
     path('api/docs/kaznikaz/version1/', include(router.urls)),
     path('api/chat/',include('Chat.urls')),
     path('api/Product/shop/<int:id>', views.ShopProduct.as_view()),

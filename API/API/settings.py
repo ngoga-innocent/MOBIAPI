@@ -113,6 +113,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'API.urls'
@@ -196,23 +197,48 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = "/media/"
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',  # Enable session authentication
+        'knox.auth.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',  # Allow unauthenticated clients to read
+    ),
+    'DEFAULT_RENDERER_CLASSES': [
+#     #     'rest_framework.renderers.JSONRenderer',
+         'rest_framework.renderers.BrowsableAPIRenderer',
+    ]
+}
+
 # REST_FRAMEWORK={
-# 'DEFAULT_PERMISSION_CLASSES':(
-#     'rest_framework.permissions.allowAny',
+# # 'DEFAULT_PERMISSION_CLASSES':(
+# #     'rest_framework.permissions.allowAny',
+# #     ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#         # Additional permission classes if needed
 #     ),
 #     'DEFAULT_AUTHENTICATION_CLASSESS':(
 #     'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
 #     'rest_framework.authentication.SessionAuthentication',
 #     'rest_framework.authentication.BasicAuthentication',
+#     'knox.auth.TokenAuthentication'
 #     ),
 # }
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication','rest_framework_simplejwt.authentication.JWTAuthentication'),
-    # 'DEFAULT_RENDERER_CLASSES': [
-    #     'rest_framework.renderers.JSONRenderer',
-    # ]
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication', 'rest_framework.authentication.SessionAuthentication',),
+#     # 'DEFAULT_RENDERER_CLASSES': [
+#     #     'rest_framework.renderers.JSONRenderer',
+# 'rest_framework.renderers.BrowsableAPIRenderer',
+#     # ]
+#     # 'DEFAULT_PERMISSION_CLASSES': (
+#     #     'rest_framework.permissions.IsAuthenticated',
+#     #     # Additional permission classes if needed
+#     # ),
 
-}
+# }
 SIMPLE_JWT={
     'ACCESS_TOKEN_LIFETIME':timedelta(minutes=600)
 }

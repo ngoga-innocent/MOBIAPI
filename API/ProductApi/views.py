@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 import uuid
 import facebook
 from django.utils.datastructures import MultiValueDictKeyError
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.authtoken.models import Token
 from social_django.utils import psa
 from requests.exceptions import HTTPError
@@ -39,6 +39,9 @@ import json
 # from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+
 # from ..API.FcmpushNotification import send_to_individual,send_push_to_all
 from API.FcmpushNotification import send_to_all_tokens,create_and_send_notification_all,create_and_send_notification_one
 User = get_user_model()
@@ -48,7 +51,28 @@ User = get_user_model()
 
 ### google Login ##########
 
+class BrowsableAPIAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        # Check if the user is authenticated for DRF views
+        if request.user and request.user.is_authenticated:
+            return (request.user, None)
+        return None
+    
+class IsAuthenticatedOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # Allow GET requests without authentication
+        if request.method in permissions.SAFE_METHODS:
+            return True
 
+        # Check if the user is authenticated for other HTTP methods (POST, PUT, etc.)
+        return request.user and request.user.is_authenticated
+class ReadOnlyOrAdminPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # Allow read-only access for GET requests
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        # Allow write access only for administrators
+        return request.user and request.user.is_staff
 def generate_verification_code():
     code = ''.join(random.choices(string.digits, k=6))
     return code
@@ -184,18 +208,28 @@ def get_facebook_user_data(request):
         return JsonResponse({'error': 'Failed to retrieve user data from Facebook'}, status=400)
 
 #Product functions
+# authentication_classes = [BrowsableAPIAuthentication]
+# permission_classes = [IsAuthenticatedOrReadOnly]
 class ProductApi(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'shop__name',
                      'seller__username', 'category__name']
+    # authentication_classes = [
+    #     'rest_framework.authentication.SessionAuthentication',  # Enable session authentication
+    #     'knox.auth.TokenAuthentication',
+    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
+    # ]
+
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 #adding Color
 class ColorApi(viewsets.ModelViewSet):
     queryset = Color.objects.all()
     serializer_class = ColorSerializer
     filter_backends = [filters.SearchFilter]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, ReadOnlyOrAdminPermission]
 
 #Categories API
 class CategoriesApi(viewsets.ModelViewSet):
@@ -203,6 +237,7 @@ class CategoriesApi(viewsets.ModelViewSet):
     serializer_class = CategoriesSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, ReadOnlyOrAdminPermission]
 
 
 # class GoogleLogin(SocialLoginView):
@@ -234,6 +269,7 @@ class ShopApi(viewsets.ModelViewSet):
 
     def post(self, request):
         user = request.user
+        permission_classes = [permissions.IsAuthenticatedOrReadOnly]
         if user.is_authenticated:
             serializer = ShopSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -331,7 +367,7 @@ class ShopComment(APIView):
 
         return Response((serializer.data))
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly, ReadOnlyOrAdminPermission]
 class ShopLike(APIView):
     def get(self, request, id):
         likes = Like.objects.filter(shopid=id)
@@ -440,38 +476,7 @@ def CreditView(request,id):
         except:
             return Response({"user not exists"},status=401)
             
-        # 
-
-    # usercredit=FreeCredit.objects.get(user=user)
-    # if(usercredit):
-    #     usercredit.credits=credits
-    #     usercredit.save()
-    # else:
-    #     credit=FreeCredit.objects.create(user=user,credits=credits)
-    #     return Response({'user credits create'},status=200)
-    
  
-
-
-
-# class Login(APIView):
-#     def post(self, request):
-
-#         serializer = AuthTokenSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data.get('user')
-#         _, token = AuthToken.objects.create(user)
-
-#         return Response({
-#             'user_info': {
-#                 'id': user.id,
-#                 'username': user.username,
-#                 'email': user.email
-#             },
-#             'token': token
-#         }, status=200)
-
-
 class Login(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -640,7 +645,7 @@ def send_email(request):
     send_mail(subject, message, from_email, recipient_list)
     return Response("email sent", status=200)
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class ResetShopPassword(APIView):
     def post(self, request):
         name = request.data.get('name')
@@ -697,7 +702,7 @@ def VerifyCode(request):
     except:
         return Response("Invalid verification Code", status=404)
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class EditShop(APIView):
     def put(self, request,shop_id):
         
@@ -714,7 +719,7 @@ class EditShop(APIView):
                 shop.save()
                 
                
-                print(shop)
+                # print(shop)
                 subject = 'Shop Update'
                 message = 'Shop information updated'
                 from_email = settings.EMAIL_HOST_USER
@@ -754,17 +759,17 @@ class SingleShop(APIView):
             }, status=status.HTTP_200_OK)
         return Response('not found')
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class CommentView(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class RatingView(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class LikeView(viewsets.ModelViewSet):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
@@ -891,7 +896,7 @@ class OurAddsView(viewsets.ModelViewSet):
     queryset = OurAdds.objects.all()
     serializer_class = OurAddsSerializer
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly, ReadOnlyOrAdminPermission]
 class NotificationView(APIView):
     def post(self, request):
         users = User.objects.all()
@@ -941,7 +946,7 @@ class AppNotification(APIView):
 
         return Response(serializer.data)
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class OtherNotification(APIView):
     def get(self, request,uid):
         notifications = Notification.objects.filter(
@@ -996,9 +1001,10 @@ class CallBack(APIView):
 #     return JsonResponse({'response': response.json()})
 ##################### OLtramz payment ############################################################
 
-
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 @csrf_exempt
 @api_view(('POST',))
+
 def Pays(request):
     payer_telephone_number = request.data.get('payerTelephoneNumber')
     amount = request.data.get('amount')
@@ -1152,26 +1158,6 @@ def CheckStatus(request):
         except:
             return Response({"message":"Not found"},status=404)
 
-# # def Product_list(request):
-# #     products=Product.objects.all()
-# #     serializer=ProductSerializer(products,many=True)
-# #     return Response(serializer.data)
-
-# class ProductList(APIView):
-#     def get(self,request):
-#         products=Product.objects.all()
-#         serializer=ProductSerializer(products,many=True)
-#         return Response(serializer.data)
-
-# class ProductCreate(APIView):
-#     def post(self,request):
-#         serializer=ProductSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-
-#         else:
-#             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 def serve_assetlinks_json(request):
     assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'assetlinks.json')
     with open(assetlinks_json_path, 'r') as file:
@@ -1180,6 +1166,7 @@ def app_serve_assetlinks_json(request):
     assetlinks_json_path = os.path.join(settings.BASE_DIR, '.well-known', 'apple-app-site-association')
     with open(assetlinks_json_path, 'r') as file:
         return HttpResponse(file.read(), content_type='application/json')
+permission_classes = [permissions.IsAuthenticatedOrReadOnly,ReadOnlyOrAdminPermission]
 class NewsViews(viewsets.ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
@@ -1216,6 +1203,7 @@ def testNot(request):
 
     create_and_send_notification_one(title,body,owner,type)
     return Response({'message':'may be sent or not'})
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class JobsViews(viewsets.ModelViewSet):
     queryset = Jobs.objects.all()
     serializer_class = JobSerializer
