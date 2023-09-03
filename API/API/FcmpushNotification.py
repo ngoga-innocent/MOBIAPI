@@ -6,6 +6,7 @@ import os
 from django.conf import settings
 from ProductApi.models import DeviceTokens,Notification
 from rest_framework.response import Response
+from firebase_admin._messaging_utils import UnregisteredError
 User=get_user_model()
 credential_path = os.path.join(settings.BASE_DIR, 'API', 'ServiceAccountKey.json')
 logopath=os.path.join(settings.BASE_DIR, 'API', 'logo.png')
@@ -33,17 +34,32 @@ firebase_admin.initialize_app(cred)
 
 
 def send_push_notification(token, title, body):
-    message = messaging.Message(
-        notification=messaging.Notification(title=title, body=body,image=logopath),
-        data={
-            "title":title,
-            "body":body
-        },
-        token=token,
-    )
+    try:
+        message = messaging.Message(
+            notification=messaging.Notification(title=title, body=body, image=logopath),
+            data={
+                "title": title,
+                "body": body
+            },
+            token=token,
+        )
 
-    response = messaging.send(message)
-    print("Successfully sent message:", response)
+        response = messaging.send(message)
+        print("Successfully sent message:", response)
+    
+    except UnregisteredError:
+        # Handle unregistered token: remove or mark as inactive in your database
+        print("Unregistered token:", token)
+        # Example: Assuming you have a DeviceTokens model with a 'token' field
+        # You can mark it as inactive (e.g., set 'active' field to False)
+        delete=DeviceTokens.objects.filter(deviceToken=token).delete()
+        if delete:
+            pass
+        else:
+            pass
+    except Exception as e:
+        # Handle other exceptions (e.g., network errors)
+        print("Error sending message:", str(e))
 def send_to_all_tokens(title,body):
     tokens=DeviceTokens.objects.all()
 

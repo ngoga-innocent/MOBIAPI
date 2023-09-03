@@ -216,13 +216,26 @@ class ProductApi(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'shop__name',
                      'seller__username', 'category__name']
-    # authentication_classes = [
-    #     'rest_framework.authentication.SessionAuthentication',  # Enable session authentication
-    #     'knox.auth.TokenAuthentication',
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ]
+
 
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    def create(self, request, *args, **kwargs):
+        # Call the parent class's create method to create the product
+        response = super().create(request, *args, **kwargs)
+        
+        # Check if the product was created successfully
+        # serialized_data = response.data
+            # Access the product instance
+        created_product_data = response.data
+
+       
+            
+            # Retrieve the 'title' attribute from the dictionary
+        created_product_title = created_product_data.get('title', '')
+        if response.status_code == 201:
+            send_to_all_tokens(created_product_title + ' Product added on kaz ni kaz','Please review the new added product on Kaz ni Kaz to check if it meets your requirements.')
+        
+        return response
 
 #adding Color
 class ColorApi(viewsets.ModelViewSet):
@@ -1201,8 +1214,8 @@ def testNot(request):
     owner=request.data.get('id')
     type=request.data.get('type')
 
-    create_and_send_notification_one(title,body,owner,type)
-    return Response({'message':'may be sent or not'})
+    send_to_all_tokens(title,body)
+    return Response('sent')
 permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 class JobsViews(viewsets.ModelViewSet):
     queryset = Jobs.objects.all()
