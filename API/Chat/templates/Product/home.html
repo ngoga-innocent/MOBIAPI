@@ -1,210 +1,545 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaz ni Kaz</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-
-<style>
-    .hero {
-        /* background-image: url('https://static.vecteezy.com/system/resources/thumbnails/001/370/039/small/online-shopping-concept-with-mobile-phone-free-vector.jpg'); */
-        background-size: cover;
-        background-position: center;
-        min-height: 70vh;
-        display: flex;
-        align-items: center;
-        background-color: #c96924;
-    }
-    .navbar {
-      background-color: transparent !important;
-    }
-    .navbar-light .navbar-toggler-icon {
-      background-color: rgba(0, 0, 0, 0.5); /* Customize the color of the toggler icon */
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaz ni Kaz</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <link rel="icon" href="{% static 'images/logo.png' %}" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <style>
+    /* Default height for small devices */
+    #intro-example {
+      height: 400px;
     }
 
-    /* Additional styling for the hero section */
-    .hero-section {
-      position: relative;
-      height: 100vh;
-      overflow: hidden;
+    /* Height for devices larger than 992px */
+    @media (min-width: 992px) {
+      #intro-example {
+        height: 600px;
+      }
     }
 
-    .carousel-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
+    body {
+      margin-top: 20px;
+      background: #eee;
+    }
+
+    .card::after {
+      display: block;
+      position: absolute;
+      bottom: -10px;
+      left: 20px;
+      width: calc(100% - 40px);
+      height: 35px;
+      background-color: #fff;
+      -webkit-box-shadow: 0 19px 28px 5px rgba(64, 64, 64, 0.09);
+      box-shadow: 0 19px 28px 5px rgba(64, 64, 64, 0.09);
+      content: "";
       z-index: -1;
     }
 
-    .carousel-caption {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      width: 100%;
-      color: white;
+    a.card {
+      text-decoration: none;
     }
-    </style>
+
+    .card {
+      position: relative;
+      border: 0;
+      border-radius: 0;
+      background-color: #fff;
+      -webkit-box-shadow: 0 12px 20px 1px rgba(64, 64, 64, 0.09);
+      box-shadow: 0 12px 20px 1px rgba(64, 64, 64, 0.09);
+    }
+
+    .card {
+      position: relative;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      min-width: 0;
+      word-wrap: break-word;
+      background-color: #fff;
+      background-clip: border-box;
+      border: 1px solid rgba(0, 0, 0, 0.125);
+      border-radius: 0.25rem;
+    }
+
+    .box-shadow {
+      -webkit-box-shadow: 0 12px 20px 1px rgba(64, 64, 64, 0.09) !important;
+      box-shadow: 0 12px 20px 1px rgba(64, 64, 64, 0.09) !important;
+    }
+
+    .ml-auto,
+    .mx-auto {
+      margin-left: auto !important;
+    }
+
+    .mr-auto,
+    .mx-auto {
+      margin-right: auto !important;
+    }
+
+    .rounded-circle {
+      border-radius: 50% !important;
+    }
+
+    .bg-white {
+      background-color: #fff !important;
+    }
+
+    .ml-auto,
+    .mx-auto {
+      margin-left: auto !important;
+    }
+
+    .mr-auto,
+    .mx-auto {
+      margin-right: auto !important;
+    }
+
+    .d-block {
+      display: block !important;
+    }
+
+    img,
+    figure {
+      max-width: 100%;
+      height: auto;
+      vertical-align: middle;
+    }
+
+    .card-text {
+      padding-top: 12px;
+      color: #8c8c8c;
+    }
+
+    .text-sm {
+      font-size: 12px !important;
+    }
+
+    p,
+    .p {
+      margin: 0 0 16px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-family: "Montserrat", sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .pt-1,
+    .py-1 {
+      padding-top: 0.25rem !important;
+    }
+
+    .head-icon {
+      margin-top: 18px;
+      color: #ff4500;
+    }
+
+    .round-circle {
+      border-radius: 40px;
+      border-width: 1;
+      border-color: #ff4500;
+    }
+
+    /* Add additional styling as needed */
+  </style>
 </head>
+
 <body>
-    <!-- Navigation bar-->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-          <a class="navbar-brand" href="#">Logo</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+  <!-- <video autoplay muted loop >
+    <source src="https://www.youtube.com/watch?v=RgNuwb9lpeg" type="video/mp4" />
+   </video> -->
+  <header>
+    <!-- Intro settings -->
+    <!-- <iframe width="1254" height="705" src="https://www.youtube.com/embed/RgNuwb9lpeg" title="Temu App Official Big Game Ad | Shop like a Billionaire" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
+
+    <!-- Navbar -->
+
+    <!-- Navbar -->
+
+    <!-- Background image -->
+    <div id="intro-example" class="p-5 text-center bg-image" style="background-image: url('{% static 'images/header.jpeg' %}');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: rgba(0, 0, 0, 0.5);"
+>
+      <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+        <div class="container-fluid">
+          <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarExample01"
+            aria-controls="navbarExample01" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
           </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-              <li class="nav-item">
-                <a class="nav-link" href="#about">About Us</a>
+          <div class="collapse navbar-collapse" id="navbarExample01">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item active">
+                <a class="nav-link" aria-current="page" href="#">Home</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#services">Services</a>
+                <a class="nav-link" href="#">Features</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#contact">Contact Us</a>
+                <a class="nav-link" href="#">Pricing</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">About</a>
               </li>
             </ul>
           </div>
         </div>
       </nav>
-<!-- Hero Section with Carousel -->
-<header class="hero-section">
-    <div id="heroCarousel" class="carousel slide" data-ride="carousel">
-      <div class="carousel-inner">
-        <div class="carousel-item active">
-          <img src="https://news.gandi.net/wp-content/uploads/2017/09/2017_08_shop-1-1024x512.jpg" class="d-block w-100" alt="Image 1">
-          <div class="carousel-caption">
-            <h2>Welcome to Our Website</h2>
+      <div class="mask">
+        <div class="d-flex justify-content-center align-items-center h-100">
+          <div class="text-white">
+            <h1 class="mb-3">Kaz ni Kaz</h1>
+            <h5 class="mb-4">
+              Online Market, meet your client and your product
+            </h5>
+            <a class="btn btn-outline-light btn-lg m-2" href="#" role="button" rel="nofollow" target="_blank">Get app on
+              Playstore</a>
+            <a class="btn btn-outline-light btn-lg m-2" href="#" target="_blank" role="button">Get App on Apple
+              store</a>
           </div>
         </div>
-        <div class="carousel-item">
-          <img src="https://c8.alamy.com/compfr/hb52kw/le-mot-shop-ecrit-en-blanc-3d-lettres-sur-un-fond-colore-concept-et-theme-hb52kw.jpg" class="d-block w-100" alt="Image 2">
-          <div class="carousel-caption">
-            <h2>Discover Our Services</h2>
-          </div>
-        </div>
-        <!-- Add more carousel items here -->
       </div>
-      <a class="carousel-control-prev" href="#heroCarousel" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-      </a>
-      <a class="carousel-control-next" href="#heroCarousel" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-      </a>
     </div>
+    <!-- Background image -->
+    <!-- in Section -->
+    <!-- carousell-->
+  
   </header>
-
-<!-- FAQ Section -->
-<section class="faq py-5">
-    <div class="container">
-        <h2 class="text-center mb-4">Frequently Asked Questions</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <h4>Is Kaz ni Kaz international?</h4>
-                <p>Yes Kaz ni Kaz works in all countries of the world</p>
-            </div>
-            <div class="col-md-6">
-                <h4>how do you process payments?</h4>
-                <p>currently we are only using mobile money. but our team is working hard to be abke to use card payments</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <h4 class="font-bold ">Is Kaz Ni Kaz free to use?</h4>
-                <p>Yes, kaz ni Kaz is open for every body for free just for some services like view and visiting even contacting the seller but amzing features are payable features</p>
-            </div>
-            <div class="col-md-6">
-                <h4>How to know that the features are amazing without testing them?</h4>
-                <p>Our teams offer starting money for using Kaz ni Kaz amazing features which are not limited. grab yours but registering and using kaz ni kaz</p>
-            </div>
-        </div>
+  <!--Carousell sectioin -->
+  <div id="imageCarousel" class="carousel slide py-5" data-ride="carousel">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+      <li data-target="#imageCarousel" data-slide-to="0" class="active"></li>
+      <li data-target="#imageCarousel" data-slide-to="1"></li>
+      <li data-target="#imageCarousel" data-slide-to="2"></li>
+    </ol>
+  
+    <!-- Slides -->
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="{% static 'images/mtn.png'%}" alt="Image 1" class="img-circle d-block mx-auto"  style="height: 20vh;width: 20vh; border-radius: 20vh;">
+      </div>
+      <div class="carousel-item">
+        <img src="{% static 'images/airtel.png'%}" alt="Image 2" class="img-circle d-block mx-auto" style="height: 20vh;width: 20vh; border-radius: 20vh;">
+      </div>
+      <div class="carousel-item">
+        <img src="{% static 'images/visa.png'%}" alt="Image 3" class="img-circle d-block mx-auto" style="height: 20vh;width: 20vh; border-radius: 20vh;">
+      </div>
     </div>
-</section>
-
-<!-- Get App Section -->
-<section class="get-app bg-light py-5">
-    <div class="container">
-        <div class="row justify-content-between">
-            <div class="col-md-6">
-                <h2>Get Kaz ni Kaz Now!</h2>
-                <p>Download our app and start experiencing amazing features.</p>
-                <a href="#" class="btn btn-primary">Download Now</a>
-            </div>
-            <div class="d-flex justify-content-center">
-                <a href="#" class="me-3">
-                    <img class="img-fluid" style="height: 60px; width: 120px; border-radius: 10px;" src="data:image/png;base64,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" alt="Google Play Store" width="150">
-                </a>
-                
-                <a href="#">
-                    <img class="img-fluid" style="height: 60px; width: 120px; border-radius: 10px;" src="https://e7.pngegg.com/pngimages/422/842/png-clipart-apple-store-logo-app-store-android-google-play-get-started-now-button-text-logo.png" alt="Apple App Store" width="150">
-                </a>
-            </div>
-        </div>
+  
+    <!-- Controls -->
+    <a class="carousel-control-prev" href="#imageCarousel" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#imageCarousel" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+  <!-- <hr style="height: 2px; width: 90%; background-color: #ff4500; align-self: center; " /> -->
+  <!-- Services Section -->
+  <section class="container pt-3 mb-3">
+    <h5 class="h5 block-title text-center text-md">
+      What we do,<small>Whatever we do, we do with your end user in mind
+      </small>
+    </h5>
+    <div class="row pt-5 mt-30">
+      <div class="col-lg-4 col-sm-6 mb-30 pb-5">
+        <a class="card" href="#">
+          <div class="box-shadow bg-white rounded-circle mx-auto text-center"
+            style="width: 90px; height: 90px; margin-top: -45px">
+            <i class="fa fa-user fa-3x head-icon"></i>
+          </div>
+          <div class="card-body text-center">
+            <h3 class="card-title pt-1">Find Your Match</h3>
+            <p class="card-text text-sm">
+              Browse through service provider profiles, compare offerings, and select the one that best suits your needs
+              and preferences.
+            </p>
+            <span class="text-sm text-uppercase font-weight-bold">Learn More&nbsp;<i
+                class="fe-icon-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-sm-6 mb-30 pb-5">
+        <a class="card" href="#">
+          <div class="box-shadow bg-white rounded-circle mx-auto text-center"
+            style="width: 90px; height: 90px; margin-top: -45px">
+            <i class="fa fa-user-circle-o fa-3x head-icon"></i>
+          </div>
+          <div class="card-body text-center">
+            <h3 class="card-title pt-1">commuinication &amp; Help</h3>
+            <p class="card-text text-sm">
+              Connect directly with service providers through our messaging system. Discuss project details, timelines, and any specific requirements
+            </p>
+            <span class="text-sm text-uppercase font-weight-bold">Learn More&nbsp;<i
+                class="fe-icon-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-sm-6 mb-30 pb-5">
+        <a class="card" href="#">
+          <div class="box-shadow bg-white rounded-circle mx-auto text-center"
+            style="width: 90px; height: 90px; margin-top: -45px">
+            <i class="fa fa-address-book fa-3x head-icon"></i>
+          </div>
+          <div class="card-body text-center">
+            <h3 class="card-title pt-1">Connection to jobs</h3>
+            <p class="card-text text-sm">
+              Once the details are agreed upon, let the service provider work their magic. Track the progress and provide feedback upon completion
+            </p>
+            <span class="text-sm text-uppercase font-weight-bold">Learn More&nbsp;<i
+                class="fe-icon-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-sm-6 mb-30 pb-5">
+        <a class="card" href="#">
+          <div class="box-shadow bg-white rounded-circle mx-auto text-center"
+            style="width: 90px; height: 90px; margin-top: -45px">
+            <i class="fa fa-car fa-3x head-icon"></i>
+          </div>
+          <div class="card-body text-center">
+            <h3 class="card-title pt-1">Real world life breaking News </h3>
+            <p class="card-text text-sm">
+              Stay connected with us as we cover breaking news, in-depth news research, and thought-provoking features.with kaz ni kaz you are able to find real news 
+            </p>
+            <span class="text-sm text-uppercase font-weight-bold">Learn More&nbsp;<i
+                class="fe-icon-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-sm-6 mb-30 pb-5">
+        <a class="card" href="#">
+          <div class="box-shadow bg-white rounded-circle mx-auto text-center"
+            style="width: 90px; height: 90px; margin-top: -45px">
+            <i class="fa fa-camera fa-3x head-icon"></i>
+          </div>
+          <div class="card-body text-center">
+            <h3 class="card-title pt-1">Shop Registration</h3>
+            <p class="card-text text-sm">
+              Register your shop with us to get uncountable shopping community.
+            </p>
+            <span class="text-sm text-uppercase font-weight-bold">Learn More&nbsp;<i
+                class="fe-icon-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-sm-6 mb-30 pb-5">
+        <a class="card" href="#">
+          <div class="box-shadow bg-white rounded-circle mx-auto text-center"
+            style="width: 90px; height: 90px; margin-top: -45px">
+            <i class="fa fa-image fa-3x head-icon"></i>
+          </div>
+          <div class="card-body text-center">
+            <h3 class="card-title pt-1">Get the know your item on market</h3>
+            <p class="card-text text-sm">
+              Kaz ni kaz keeps your items on market for you 
+            </p>
+            <span class="text-sm text-uppercase font-weight-bold">Learn More&nbsp;<i
+                class="fe-icon-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
     </div>
-</section>
-<!-- Services Section -->
-<section class="services py-5">
-    <div class="container">
-        <h2 class="text-center mb-4">Our Services</h2>
-        <div class="row">
-            <div class="col-md-4">
-                <h4>Service 1</h4>
-                <p>Description of service 1.</p>
-            </div>
-            <div class="col-md-4">
-                <h4>Service 2</h4>
-                <p>Description of service 2.</p>
-            </div>
-            <div class="col-md-4">
-                <h4>Service 3</h4>
-                <p>Description of service 3.</p>
-            </div>
-        </div>
+  </section>
+  <!--Section: FAQ-->
+  <section>
+    <h3 class="text-center mb-4 pb-2 text-primary fw-bold">FAQ</h3>
+    <p class="text-center mb-5">
+      Find the answers for the most frequently asked questions below
+    </p>
+
+    <div class="row px-5 container-fluid">
+      <div class="col-md-6 col-lg-4 mb-4">
+        <h6 class="mb-3 text-primary">
+          <i class="far fa-paper-plane text-primary pe-2"></i> IS Kaz ni Kaz
+          internation?
+        </h6>
+        <p>
+          <strong><u>Absolutely!Yes Kaz ni Kaz works in all countries of the
+              world.</u></strong>
+        </p>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <h6 class="mb-3 text-primary">
+          how do you process payments?<i class="fas fa-pen-alt text-primary pe-2"></i>
+        </h6>
+        <p>
+          <strong><u>Secured Mobile money transfer!</u></strong>
+          currently we are only using mobile money. but our team is working
+          hard to be abke to use card payments
+        </p>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <h6 class="mb-3 text-primary">
+          <i class="fas fa-user text-primary pe-2"></i> Is Kaz Ni Kaz free to
+          use?
+        </h6>
+        <p>
+          Yes, kaz ni Kaz is open for every body for free just for some
+          services like view and visiting even contacting the seller but
+          amzing features are payable features
+        </p>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <h6 class="mb-3 text-primary">
+          <i class="fas fa-rocket text-primary pe-2"></i> How to know that the
+          features are amazing without testing them?
+        </h6>
+        <p>
+          Our teams offer starting money for using Kaz ni Kaz amazing features
+          which are not limited. grab yours but registering and using kaz ni
+          kaz
+        </p>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <h6 class="mb-3 text-primary">
+          <i class="fas fa-home text-primary pe-2"></i> Where is the
+          headQuaters of Kaz ni Kaz
+        </h6>
+        <p>
+          <strong><u>Unfortunately,</u>.</strong> there is no fixed headquater
+          for Kaz ni Kaz currently as we are working online you can contacty
+          us any time
+        </p>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <h6 class="mb-3 text-primary">
+          <i class="fas fa-book-open text-primary pe-2"></i> Do Kaz ni Kaz
+          offer live support?
+        </h6>
+        <p>
+          Of course! We provide you any needed support to work with Kaz ni Kaz
+        </p>
+      </div>
     </div>
-</section>
+  </section>
+  <!--Section: FAQ-->
 
-<!-- About Us Section -->
-<section class="about-us bg-light py-5" id="about">
+  <!-- Get App Section -->
+  <!-- <section class="get-app bg-light py-5">
     <div class="container">
-        <h2 class="text-center mb-4">About Us</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <img src="https://media.istockphoto.com/id/1163589059/photo/about-us.jpg?s=612x612&w=0&k=20&c=xiAumkYaKpQc3xepslDpn-lFhYPae6ivX_rRkgSXJgs=" alt="About Us" class="img-fluid">
-            </div>
-            <div class="col-md-6">
-                <p>We are online Serice offers,by connecting the seller and buyer live and instantly</p>
-                <p>We connect people with market </p>
-            </div>
+      <div class="row justify-content-between">
+        <div class="col-md-6">
+          <h2>Get Kaz ni Kaz Now!</h2>
+          <p>Download our app and start experiencing amazing features.</p>
+          <a href="#" class="btn btn-primary">Download Now</a>
         </div>
-    </div>
-</section>
+        <div class="d-flex justify-content-center">
+          <a href="#" class="me-3">
+            <img class="img-fluid" style="height: 60px; width: 120px; border-radius: 10px"
+              src="data:image/png;base64,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"
+              alt="Google Play Store" width="150" />
+          </a>
 
-<!-- Footer -->
-<footer class="footer bg-dark text-white py-4">
+          <a href="#">
+            <img class="img-fluid" style="height: 60px; width: 120px; border-radius: 10px"
+              src="https://e7.pngegg.com/pngimages/422/842/png-clipart-apple-store-logo-app-store-android-google-play-get-started-now-button-text-logo.png"
+              alt="Apple App Store" width="150" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+
+  <!-- About Us Section -->
+  <section class="about-us row" id="about">
+    <div class="container-fluid my-4">
+      <div class="row px-5">
+        <div class="col-md-6">
+          <img src="{% static 'images/crowd.jpeg' %}" alt="Kaz ni Kaz" class="img-fluid round-circle" />
+        </div>
+        <div class="col-md-6">
+          <h3 class="font-weight-bold">About Kaz ni Kaz</h3>
+          <p class="card-text text-sm">
+            Welcome to Kaz Ni Kaz, the ultimate mobile app that redefines the
+            way you buy, sell, and connect. Whether you're looking to find
+            your dream home, upgrade your vehicle, showcase your electronics,
+            explore job opportunities, or advertise your services, Kaz Ni Kaz
+            is your go-to platform. We're more than just a marketplace; we're
+            a dynamic community that brings together buyers, sellers, job
+            seekers, and service providers in one convenient space.
+          </p>
+          <p class="card-text text-sm">
+            At Kaz Ni Kaz, we envision a world where transactions,
+            connections, and opportunities are effortlessly accessible to
+            everyone. Our mission is to empower individuals and businesses by
+            providing an inclusive and user-friendly platform that caters to a
+            diverse range of needs. From tangible items like houses and cars
+            to intangible services and job opportunities, Kaz Ni Kaz is where
+            possibilities come to life.
+          </p>
+          <p class="card-text text-sm">
+            No need to juggle between different apps for buying and selling
+            different items or searching for jobs. Kaz Ni Kaz offers a
+            comprehensive marketplace where you can explore listings for real
+            estate, vehicles, electronics, and more, all while connecting with
+            potential employers and service providers.
+          </p>
+          <p class="card-text text-sm">
+            Our app boasts a sleek and intuitive design that ensures a
+            seamless experience for users of all backgrounds. Easily navigate
+            through categories, search filters, and personalized
+            recommendations Looking for your next career move? Kaz Ni Kaz
+            isn't just about buying and selling; it's also a hub for job
+            seekers and employers. Browse job listings, submit applications,
+            and connect with potential employers seamlessly.
+          </p>
+          <p class="card-text text-sm">
+            Trust is crucial, which is why every listing on Kaz Ni Kaz
+            undergoes a meticulous verification process. Whether you're
+            purchasing a car or exploring job opportunities, you can be
+            confident in the authenticity of the listings.We take your
+            security seriously. Our platform incorporates state-of-the-art
+            security measures to safeguard your personal information,
+            financial details, and communication.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer bg-dark text-white py-4">
     <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h4>Contact Us</h4>
-                <p>Email: kaznikaz@gmail.com</p>
-                <p>Phone: (+250) 788 886 530</p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <p>&copy; 2023 Kaz ni Kaz. All rights reserved.</p>
-            </div>
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Contact Us</h4>
+          <p>Email: kaznikaz@gmail.com</p>
+          <p>Phone: (+250) 788 886 530</p>
         </div>
+        <div class="col-md-6 text-md-end">
+          <p>&copy; 2023 Kaz ni Kaz. All rights reserved.</p>
+        </div>
+      </div>
     </div>
-</footer>
+  </footer>
 
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>

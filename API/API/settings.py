@@ -33,7 +33,7 @@ DEBUG=True
 
 # ALLOWED_HOSTS = ['localhost', '192.168.1.68:8001',
 #                  '10.0.2.2:8001', 'b0eb-2c0f-eb68-62c-9f00-b9de-ba13-67d9-164e.ngrok-free.app']
-ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
+# ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
 # AUTHENTICATION BACKENDS
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -184,12 +184,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIR = [
+STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
-
+# STATICFILES_DIRS=[
+#     BASE_DIR / "static"
+# ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
